@@ -1,0 +1,28 @@
+---
+title: "Sean Kennedy Homework 4"
+output: html_notebook
+---
+Question 1: 
+Part B
+
+```{r}
+logging_data <- read.csv('~/Documents/SMU/Stats/Homework/HW4/Logging.csv')
+wilcox.test(PercentLost ~ Action, logging_data)
+
+```
+
+
+
+```{r}
+education_data <- read.csv('EducationData.csv')
+t.test(Income2005 ~ Educ, education_data, var.equal=FALSE, alternative='less')
+```
+
+```{r}
+autism_data = read.csv('~/Documents/SMU/Stats/Homework/HW4/Autism.csv')
+wilcox.test(x=autism_data$Before, y=autism_data$After, paired=TRUE)
+```
+```{r}
+autism_data = read.csv('~/Documents/SMU/Stats/Homework/HW4/Autism.csv')
+t.test(x=autism_data$Before, y=autism_data$After, paired=TRUE, alternative = 'less', conf.level = 0.01)
+```

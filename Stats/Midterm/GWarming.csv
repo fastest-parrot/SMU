@@ -1,0 +1,189 @@
+Rating,Country,Wealth,Gender
+45,China,Low,Female
+48,China,Low,Female
+51,China,Low,Female
+55,China,Low,Female
+44,China,Wealthy,Female
+49,China,Wealthy,Female
+51,China,Wealthy,Female
+52,China,Wealthy,Female
+52,China,Wealthy,Female
+53,China,Moderate,Female
+53,China,Moderate,Female
+54,China,Moderate,Female
+64,China,Moderate,Female
+38,China,Low,Male
+30,China,Low,Male
+43,China,Low,Male
+36,China,Wealthy,Male
+40,China,Wealthy,Male
+42,China,Wealthy,Male
+42,China,Wealthy,Male
+43,China,Wealthy,Male
+46,China,Wealthy,Male
+47,China,Moderate,Male
+49,China,Moderate,Male
+51,China,Moderate,Male
+52,China,Moderate,Male
+53,China,Moderate,Male
+58,China,Moderate,Male
+60,China,Moderate,Male
+57,Germany,Low,Female
+60,Germany,Low,Female
+67,Germany,Low,Female
+55,Germany,Wealthy,Female
+56,Germany,Wealthy,Female
+57,Germany,Wealthy,Female
+59,Germany,Wealthy,Female
+59,Germany,Wealthy,Female
+59,Germany,Wealthy,Female
+60,Germany,Wealthy,Female
+60,Germany,Wealthy,Female
+62,Germany,Moderate,Female
+62,Germany,Moderate,Female
+63,Germany,Moderate,Female
+64,Germany,Moderate,Female
+65,Germany,Moderate,Female
+66,Germany,Moderate,Female
+70,Germany,Moderate,Female
+52,Germany,Low,Male
+60,Germany,Low,Male
+43,Germany,Wealthy,Male
+46,Germany,Wealthy,Male
+50,Germany,Wealthy,Male
+55,Germany,Wealthy,Male
+58,Germany,Wealthy,Male
+58,Germany,Wealthy,Male
+60,Germany,Wealthy,Male
+61,Germany,Wealthy,Male
+61,Germany,Wealthy,Male
+61,Germany,Wealthy,Male
+61,Germany,Wealthy,Male
+63,Germany,Moderate,Male
+65,Germany,Moderate,Male
+68,Germany,Moderate,Male
+41,Russia,Low,Female
+43,Russia,Low,Female
+46,Russia,Low,Female
+46,Russia,Low,Female
+48,Russia,Low,Female
+49,Russia,Low,Female
+49,Russia,Low,Female
+49,Russia,Low,Female
+50,Russia,Low,Female
+50,Russia,Low,Female
+50,Russia,Low,Female
+51,Russia,Wealthy,Female
+51,Russia,Wealthy,Female
+52,Russia,Wealthy,Female
+52,Russia,Wealthy,Female
+52,Russia,Wealthy,Female
+53,Russia,Wealthy,Female
+54,Russia,Moderate,Female
+56,Russia,Moderate,Female
+57,Russia,Moderate,Female
+37,Russia,Low,Male
+39,Russia,Low,Male
+35,Russia,Wealthy,Male
+36,Russia,Wealthy,Male
+38,Russia,Wealthy,Male
+39,Russia,Wealthy,Male
+44,Russia,Wealthy,Male
+45,Russia,Wealthy,Male
+50,Russia,Moderate,Male
+51,Russia,Moderate,Male
+56,Russia,Moderate,Male
+49,South Arfica,Low,Female
+56,South Arfica,Low,Female
+61,South Arfica,Low,Female
+52,South Arfica,Low,Female
+57,South Arfica,Low,Female
+58,South Arfica,Low,Female
+59,South Arfica,Wealthy,Female
+60,South Arfica,Wealthy,Female
+60,South Arfica,Moderate,Female
+60,South Arfica,Moderate,Female
+71,South Arfica,Moderate,Female
+50,South Arfica,Low,Male
+53,South Arfica,Low,Male
+55,South Arfica,Low,Male
+59,South Arfica,Low,Male
+44,South Arfica,Low,Male
+45,South Arfica,Low,Male
+46,South Arfica,Low,Male
+51,South Arfica,Low,Male
+51,South Arfica,Low,Male
+54,South Arfica,Low,Male
+54,South Arfica,Low,Male
+55,South Arfica,Low,Male
+56,South Arfica,Low,Male
+56,South Arfica,Wealthy,Male
+56,South Arfica,Wealthy,Male
+57,South Arfica,Wealthy,Male
+58,South Arfica,Wealthy,Male
+65,South Arfica,Moderate,Male
+59,South Arfica,Moderate,Male
+54,Sri Lanka,Low,Female
+65,Sri Lanka,Low,Female
+45,Sri Lanka,Low,Female
+52,Sri Lanka,Low,Female
+56,Sri Lanka,Moderate,Female
+57,Sri Lanka,Wealthy,Female
+60,Sri Lanka,Wealthy,Female
+41,Sri Lanka,Low,Male
+49,Sri Lanka,Low,Male
+55,Sri Lanka,Low,Male
+57,Sri Lanka,Low,Male
+40,Sri Lanka,Wealthy,Male
+44,Sri Lanka,Wealthy,Male
+45,Sri Lanka,Wealthy,Male
+46,Sri Lanka,Wealthy,Male
+46,Sri Lanka,Wealthy,Male
+47,Sri Lanka,Wealthy,Male
+48,Sri Lanka,Wealthy,Male
+48,Sri Lanka,Moderate,Male
+51,Sri Lanka,Moderate,Male
+51,Sri Lanka,Moderate,Male
+53,Sri Lanka,Moderate,Male
+54,Sri Lanka,Moderate,Male
+55,Sri Lanka,Moderate,Male
+56,Sri Lanka,Moderate,Male
+52,US,Low,Female
+53,US,Low,Female
+58,US,Low,Female
+59,US,Low,Female
+35,US,Low,Female
+43,US,Low,Female
+53,US,Low,Female
+54,US,Low,Female
+54,US,Wealthy,Female
+55,US,Wealthy,Female
+55,US,Wealthy,Female
+55,US,Wealthy,Female
+55,US,Wealthy,Female
+56,US,Wealthy,Female
+56,US,Wealthy,Female
+57,US,Wealthy,Female
+57,US,Moderate,Female
+57,US,Moderate,Female
+57,US,Moderate,Female
+58,US,Moderate,Female
+61,US,Moderate,Female
+61,US,Moderate,Female
+63,US,Moderate,Female
+54,US,Low,Male
+55,US,Low,Male
+42,US,Low,Male
+45,US,Low,Male
+45,US,Low,Male
+48,US,Low,Male
+50,US,Wealthy,Male
+51,US,Wealthy,Male
+52,US,Wealthy,Male
+52,US,Wealthy,Male
+52,US,Wealthy,Male
+53,US,Wealthy,Male
+54,US,Wealthy,Male
+70,US,Moderate,Male
+56,US,Moderate,Male
+58,US,Moderate,Male

@@ -1,0 +1,66 @@
+---
+title: "Sean Kennedy: Homework 5: Doing Data Science "
+output: html_notebook
+---
+
+Question 1
+a)
+```{r echo=TRUE}
+df = read.csv('~/Documents/SMU/DoingDataScience/Homework/hw5/yob2016.txt', sep=';', fill=TRUE, col.names = c('Name', 'Gender', 'Frequency'))
+```
+
+b)
+```{r echo=TRUE}
+summary(df)
+```
+c)
+```{r echo=TRUE}
+library(stringi)
+yyy_name = df[substr(df$Name, stri_length(df$Name)-2, stri_length(df$Name)) == 'yyy',]
+yyy_name
+```
+d)
+```{r echo=TRUE}
+y2016 = df[substr(df$Name, stri_length(df$Name)-2, stri_length(df$Name)) != 'yyy',]
+y2016
+```
+
+Question 2:
+a)
+```{r echo=TRUE}
+y2015 = read.csv('~/Documents/SMU/DoingDataScience/Homework/hw5/yob2015.txt', sep=',', fill=TRUE, col.names = c('Name', 'Gender', 'Frequency'))
+```
+b)
+```{r echo=TRUE}
+tail(y2015, 10)
+```
+All male names, all have a frequency of 5, all begin with Z
+
+Question 3:
+a)
+```{r echo=TRUE}
+final = merge(x=y2016, y=y2015, by=c("Name", "Gender"), suffixes = c('2016', '2015'))
+final['Total'] = final$Frequency2016 + final$Frequency2015
+sum(final$Total)
+```
+b)
+```{r echo=TRUE}
+sorted_by_total = final[order(-final$Total),]
+head(sorted_by_total, 10)
+```
+c)
+```{r echo=TRUE}
+head(sorted_by_total[sorted_by_total$Gender == 'F', ], 10)
+
+```
+d)
+```{r echo=TRUE}
+female_names = sorted_by_total[sorted_by_total$Gender == 'F', c('Name', 'Total')]
+top_10_female_names = data.frame(female_names[1:10, ])
+rownames(top_10_female_names) <- c()
+write.csv(top_10_female_names[c('Name', 'Total')], 'top_10_female_names', row.names = FALSE)
+```
+
+Check me out on github:
+https://github.com/ethereum-ninja/SMU.git
+

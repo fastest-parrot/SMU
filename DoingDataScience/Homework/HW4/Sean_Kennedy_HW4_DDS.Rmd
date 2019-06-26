@@ -1,0 +1,73 @@
+---
+title: "Sean Kennedy Homework 4: Doing Data Science"
+output: html_notebook
+---
+
+Harry Potter Cast:
+
+```{r}
+library(rvest)
+library(stringi)
+add_name_array <- function(row){
+  name = strsplit(row['Actor'][1, 1], ' ')
+  ch = row['Character'][1,1]
+  name_vec = c(name[[1]])
+  first_name = name_vec[1]
+  last_name = name_vec[(2:length(name_vec))]
+  last_name = stri_join_list(list(last_name), sep=" ") 
+  return(c(FirstName=first_name, LastName=last_name, Role=ch))
+  
+}
+harry_potter_page <- read_html('http://www.imdb.com/title/tt1201607/fullcredits')
+cast_data_html <- html_nodes(harry_potter_page, 'table.cast_list')
+t = html_table(cast_data_html)[[1]]
+names(t) <- c("Drop1", "Actor", "Drop2", "Character")
+cast <- subset(t, select = c("Actor", "Character"))
+cast =  cast[!(cast$Actor=="Rest of cast listed alphabetically:" | cast$Actor==""), ]
+z = by(cast, 1:nrow(cast), function(x) {
+  add_name_array(x)
+  })
+cast_data_by_name = as.data.frame(matrix(unlist(z), nrow=length(z), ncol=3, byrow=T))
+names(cast_data_by_name) = c('FirstName', 'LastName', 'Role')
+head(cast_data_by_name, 10)
+
+```
+
+San Antonio Spurs
+
+```{r}
+#.Table2__table__wrapper :nth-child(1)
+library(rvest)
+library(ggplot2)
+library(stringi)
+parse_row <- function(row){
+  name = strsplit(row['Player'][1, 1], ' ')
+  name_vec =  c(name[[1]])
+  name =  stri_join_list(list(name_vec[1:length(name_vec)-1]), sep=" ")
+  position = name_vec[length(name_vec)] 
+  return(c(PlayerName=name, Position=position))
+}
+spurs_page <- read_html('https://www.espn.com/nba/team/stats/_/name/sa/san-antonio-spurs')
+spurs_data_html <- html_nodes(spurs_page, '.Table2__table__wrapper')
+t = html_table(spurs_data_html, dec = '.', fill=TRUE)[[2]]
+t = t[3:nrow(t),1:14]
+players = t[1:13,1]
+player_stats = t[16:29,]
+names(player_stats) = player_stats[1,]
+player_stats = as.data.frame(sapply(player_stats[2:nrow(player_stats),], as.numeric))
+player_stats['Player'] = players
+z = by(player_stats, 1:nrow(player_stats), function(x) {
+  parse_row(x)
+  })
+player_names_and_positions = as.data.frame(matrix(unlist(z), nrow=length(z), ncol=2, byrow=T), stringsAsFactors = FALSE)
+player_stats['Player'] = player_names_and_positions['V1'] 
+player_stats['Position'] = player_names_and_positions['V2']
+for(x in player_stats){
+  print(typeof(x))
+}
+
+spurs_plot = ggplot(player_stats, aes(x=player_stats$Player, y=player_stats$`FG%`, fill=player_stats$Position)) + geom_bar(stat = "identity") + coord_flip() + labs(x = 'Player', y='FG%', fill='Position') 
+print(spurs_plot + ggtitle('FG% By Player') +
+  theme(plot.title = element_text(hjust = 0.5)))
+
+```

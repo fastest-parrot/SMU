@@ -1,0 +1,115 @@
+---
+title: "Sean_Kennedy_Homework_5_Stats"
+author: "Sean Kennedy"
+date: "June 20, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggpubr)
+library(multcomp)
+library(car)
+library(sqldf)
+```
+
+## R Question 1 Problem 5.25 from Text (ANOVA)
+
+```{r}
+raw_data = read.csv('prostate.csv')
+raw_data[,'gleason'] = factor(raw_data[,'gleason'])
+res.aov = aov(psa ~ gleason, data=raw_data)
+summary(res.aov)
+```
+
+## Let's plot the fuck out of this!
+
+```{r education_data, echo=FALSE}
+# tak a random sample for good measure
+set.seed(1234)
+dplyr::sample_n(raw_data, 10)
+levels(raw_data$gleason)
+#show some group stats
+group_by(raw_data, gleason) %>% summarise(
+  count = n(),
+  mean = mean(psa, na.rm = TRUE),
+  sd = sd(psa, na.rm = TRUE)
+)
+ggboxplot(raw_data, x='gleason', y='psa', color = 'gleason',
+          palette=palette(rainbow(length(levels(raw_data$gleason)))),
+          ylab = 'PSA', xlab = 'Gleason'
+          )
+
+ggline(raw_data, x = 'gleason', y = 'psa', 
+       add = c('mean_se'), #(other values include: mean_sd, mean_ci, median_iqr,jitter ....)
+       ylab='PSA', xlab='Gleason')
+
+ggplot(raw_data, aes(x=psa)) + geom_histogram(binwidth=.5, colour="black", fill="white") + 
+    facet_grid(gleason ~ .) 
+```
+
+## Tukey Multiple Pairwise Comparisons
+
+```{r}
+TukeyHSD(res.aov)
+```
+
+## Let's calc the same thing using multcomp package 
+  
+    #(why doensn't this work?)
+```{r}
+summary(glht(res.aov, linfct = mcp(gleason = 'Tukey')))
+
+```
+
+## pariwise t-test, because "Why not?"
+  
+  # creates a matrix of t-tests between classes
+```{r}
+pairwise.t.test(raw_data$psa, raw_data$gleason,
+                p.adjust.method = 'BH')
+
+```
+
+## Check homogeneity of variance assumption
+```{r}
+plot(res.aov, 1)
+```
+
+## Levene's test for homogeneity of variance
+```{r}
+leveneTest(psa ~ gleason, data=raw_data)
+```
+
+## Relaxed Homogeneity Tests
+  
+  - Welch one-way
+  
+  - paired t-test w/o equality of sd assumption)
+
+```{r}
+oneway.test(psa ~ gleason, data = raw_data)
+pairwise.t.test(raw_data$psa, raw_data$gleason, p.adjust.method = 'BH', pool.sd = FALSE)
+```
+
+## Check Normality Assumption
+
+```{r}
+# Q-Q plot of residuals
+plot(res.aov, 2)
+
+# Extract the residuals 
+aov_residuals = residuals(object = res.aov)
+
+#Shapiro-Wilke on residuals
+shapiro.test(x = aov_residuals)
+```
+
+## Non Parametric Tests (Kruskal-Wallis Ranksum Test)
+
+```{r}
+kruskal.test(psa ~ gleason, data=raw_data)
+
+```
+

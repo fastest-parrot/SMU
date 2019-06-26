@@ -1,0 +1,100 @@
+---
+title: "Sean Kennedy Doing Data Science: HW 3"
+output: html_notebook
+---
+
+#Question 1: Git Code
+
+(base) Seans-MacBook-Pro:~ skennedy$ cd Documents/
+
+(base) Seans-MacBook-Pro:Documents skennedy$ cd SMU/
+
+(base) Seans-MacBook-Pro:SMU skennedy$ cd DoingDataScience/Homework/HW3/
+
+(base) Seans-MacBook-Pro:HW3 skennedy$ mkdir GIT
+
+(base) Seans-MacBook-Pro:HW3 skennedy$ cd GIT/
+
+(base) Seans-MacBook-Pro:GIT skennedy$ git clone https://github.com/caesar0301/awesome-public-datasets
+
+xcrun: error: invalid active developer path (/Library/Developer/CommandLineTools), missing xcrun at: /Library/Developer/CommandLineTools/usr/bin/xcrun
+
+(base) Seans-MacBook-Pro:GIT skennedy$ xcode-select --install
+
+xcode-select: note: install requested for command line developer tools
+
+(base) Seans-MacBook-Pro:GIT skennedy$ git clone https://github.com/caesar0301/awesome-public-datasets
+
+Cloning into 'awesome-public-datasets'...
+
+remote: Enumerating objects: 24, done.
+
+remote: Counting objects: 100% (24/24), done.
+
+remote: Compressing objects: 100% (10/10), done.
+
+remote: Total 1761 (delta 14), reused 24 (delta 14), pack-reused 1737
+
+Receiving objects: 100% (1761/1761), 665.23 KiB | 1.12 MiB/s, done.
+
+Resolving deltas: 100% (1049/1049), done.
+
+(base) Seans-MacBook-Pro:GIT skennedy$">
+
+
+```{r echo=TRUE}
+titanic_data <- read.table(file = "~/Documents/SMU/DoingDataScience/Homework/HW3/GIT/awesome-public-datasets/Datasets/titanic.csv",header = T,sep = ","); # 
+summary(titanic_data)
+#females <- titanic_data[which(titanic_data$Survived ==1)]
+females <- titanic_data[which(titanic_data$Sex =='female'), ]
+hist(females$Age, xlab = 'Age', ylab= 'Count', main = 'Female Passenger Age')
+hist(females$Survived, xlab = 'Survived', ylab= 'Count', main = 'Female Passenger Survival')
+males <- titanic_data[which(titanic_data$Sex =='male'), ]
+hist(males$Age, xlab = 'Age', ylab= 'Count', main = 'Male Passenger Age')
+hist(males$Survived, xlab = 'Survived', ylab= 'Count', main = 'Male Passenger Survival')
+means = apply(data.matrix(titanic_data[,c('Age', 'Fare', 'Survived')]), MARGIN = 2, FUN=mean, na.rm=TRUE)
+real = means == Re(means)
+```
+```{r}
+sleep_data <- read.table(file = "~/Documents/SMU/DoingDataScience/Homework/HW3/sleep_data_01.csv",header = T,sep = ",");
+summary(sleep_data)
+median_age = apply(data.matrix(sleep_data[,c('Age')]), MARGIN = 2, FUN=median, na.rm=TRUE)
+min_sleep = apply(data.matrix(sleep_data[,c('Duration')]), MARGIN = 2, FUN=min, na.rm=TRUE)
+max_sleep = apply(data.matrix(sleep_data[,c('Duration')]), MARGIN = 2, FUN=max, na.rm=TRUE)
+RSES = c(apply(data.matrix(sleep_data[,c('RSES')]), MARGIN = 2, FUN=mean, na.rm=TRUE), apply(data.matrix(sleep_data[,c('RSES')]), MARGIN = 2, FUN=sd, na.rm=TRUE))
+summary = t(summarize(sleep_data))
+
+```
+```{r}
+summarize =function(x)
+{
+  report = data.frame(c('Median Age', 'Self Esteem','SE_SD', 'Duration Range'),c(apply(data.matrix(x[,c('Age')]), MARGIN = 2, FUN=median, na.rm=TRUE),apply(data.matrix(x[,c('RSES')]), MARGIN = 2, FUN=mean, na.rm=TRUE)/5, apply(data.matrix(x[,c('RSES')]), MARGIN = 2, FUN=sd, na.rm=TRUE), apply(data.matrix(x[,c('Duration')]), MARGIN = 2, FUN=max, na.rm=TRUE)-apply(data.matrix(x[,c('Duration')]), MARGIN = 2, FUN=min, na.rm=TRUE)))
+}
+```
+```{r}
+sets = c(data(package = 'fivethirtyeight'))
+sets$results[22,]
+df = fivethirtyeight::college_recent_grads
+names(df)
+length(names(df))
+major_count = data.frame(table(df$major_category))
+par(las=2)
+barplot(major_count$Freq, names.arg=major_count$Var1, horiz=TRUE, main = 'Major Selection',ylab = 'Major', xlab = 'Frequency', col = c('red'))
+write.csv(df[names(df)[2:length(names(df))]], file='fivethirtyeight.csv')
+```
+
+```{r}
+datasets <- read.csv("https://goo.gl/OT8iHa") 
+d = datasets[which(datasets$DATAFRAME_NAME =='college_recent_grads'), ]
+dim(datasets)
+url = d['ARTICLE_URL']
+url
+d
+```
+
+
+
+
+
+
+

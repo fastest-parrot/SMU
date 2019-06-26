@@ -1,0 +1,15 @@
+---
+title: "Sean Kennedy Homework 4"
+output: html_notebook
+---
+Question 1: 
+Part B
+
+```{r}
+logging_data <- read.csv('~/Documents/SMU/Stats/Homework/HW4/Logging.csv')
+wilcox.test(PercentLost ~ Action, logging_data)
+
+```
+
+
+

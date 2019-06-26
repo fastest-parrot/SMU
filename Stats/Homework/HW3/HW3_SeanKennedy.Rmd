@@ -1,0 +1,94 @@
+---
+title: "Statistical Foundations for Data Science: Homework 3"
+output: html_notebook
+---
+
+
+
+```{r samoa}
+    Fired = c(34, 37, 37, 38, 41, 42, 43, 44, 44, 45, 45, 45, 46, 48, 49, 53, 53, 54, 54, 55, 56)
+    Not_fired = c(27, 33, 36, 37, 38, 38, 39, 42, 42, 43, 43, 44, 44, 44, 45, 45, 45, 45, 46, 46, 47, 47, 48, 48, 49, 49, 51, 51, 52, 54)
+    t.test(x = Fired, y = Not_fired, conf.int = .95, var.equal = TRUE, alternative = "two.sided")
+    hist(Fired)
+    hist(Not_fired)
+    qqnorm(Fired, pch = 1, frame = FALSE)
+    qqline(Fired, col = "steelblue", lwd = 2)
+    qqnorm(Not_fired, pch = 1, frame = FALSE)
+    qqline(Not_fired, col = "steelblue", lwd = 2)
+    Fired_log = log(Fired, base=10)
+    Not_fired_log = log(Not_fired, base=10)
+    hist(Fired_log)
+    hist(Not_fired_log)
+    qqnorm(Fired_log, pch = 1, frame = FALSE)
+    qqline(Fired_log, col = "steelblue", lwd = 2)
+    qqnorm(Not_fired_log, pch = 1, frame = FALSE)
+    qqline(Not_fired_log, col = "steelblue", lwd = 2)
+    var.test(x=Fired, y=Not_fired, alternative = "two.sided")
+    shapiro.test(Fired)
+    shapiro.test(Not_fired)
+    t.test(x = Fired_log, y = Not_fired_log, conf.int = .95, var.equal = FALSE, alternative = "two.sided")
+    
+    number_of_permutations = 10000;
+    xbarholder = c();
+    counter = 0;
+    observed_diff = mean(Fired)-mean(Not_fired)
+    all_data = c(Fired, Not_fired)
+    for(i in 1:number_of_permutations)
+    {
+      scramble = sample(all_data,length(all_data));
+      extrinsic = scramble[1:length(Fired)];
+      intrinsic = scramble[(length(Fired) + 1):length(all_data)];
+      diff = mean(intrinsic)-mean(extrinsic);
+      xbarholder[i] = diff;
+      if(diff > observed_diff)
+       counter = counter + 1;
+    }
+hist(xbarholder);
+pvalue = counter / number_of_permutations;
+pvalue
+```
+```{r}
+    SMU = c(34, 1200, 23, 50, 60, 50, 0, 0, 30, 89, 0, 300, 400, 20, 10, 0)
+    Seattle = c(20, 10, 5, 0, 30, 50, 0, 100, 110, 0, 40, 10, 3, 0)
+    t.test(x = SMU, y = Seattle, conf.int = .95, var.equal = TRUE, alternative = "two.sided")
+    hist(SMU)
+    hist(Seattle)
+    qqnorm(SMU, pch = 1, frame = FALSE)
+    qqline(SMU, col = "steelblue", lwd = 2)
+    qqnorm(Seattle, pch = 1, frame = FALSE)
+    qqline(Seattle, col = "steelblue", lwd = 2)
+    SMU_log = log(SMU, base=10)
+    Seattle_log = log(Seattle, base=10)
+    hist(SMU_log)
+    hist(Seattle_log)
+    #qqnorm(SMU_log, pch = 1, frame = FALSE)
+    #qqline(SMU_log, col = "steelblue", lwd = 2)
+    #qqnorm(Seattle_log, pch = 1, frame = FALSE)
+    #qqline(Seattle_log, col = "steelblue", lwd = 2)
+    var.test(x=SMU, y=Seattle, alternative = "two.sided")
+    shapiro.test(SMU)
+    shapiro.test(Seattle)
+    #t.test(x = SMU_log, y = Seattle_log, conf.int = .95, var.equal = FALSE, alternative = "two.sided")
+    
+    number_of_permutations = 10000;
+    xbarholder = c();
+    counter = 0;
+    observed_diff = mean(SMU)-mean(Seattle)
+    all_data = c(SMU, Seattle)
+    for(i in 1:number_of_permutations)
+    {
+      scramble = sample(all_data,length(all_data));
+      extrinsic = scramble[1:length(Fired)];
+      intrinsic = scramble[(length(Fired) + 1):length(all_data)];
+      diff = mean(intrinsic)-mean(extrinsic);
+      xbarholder[i] = diff;
+      if(diff > observed_diff)
+       counter = counter + 1;
+    }
+hist(xbarholder);
+pvalue = counter / number_of_permutations;
+pvalue
+```
+```{r}
+
+```
