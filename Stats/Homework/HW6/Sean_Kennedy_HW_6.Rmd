@@ -1,5 +1,5 @@
 ---
-title: "Sean_Kennedy_Homework_5_Stats"
+title: "Sean_Kennedy_Homework_6_Stats"
 author: "Sean Kennedy"
 date: "June 20, 2019"
 output: html_document
@@ -10,119 +10,26 @@ knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(ggpubr)
 library(multcomp)
-library(car)
+library(agricolae)
 library(sqldf)
+
 ```
 
-## R Question 1 Problem 5.25 from Text (ANOVA)
+## R Question 2 Verify 95% Interval Half Widths
 
 ```{r}
 file_name = 'Unit 6 Handicap Data.csv'
 raw_data = read.csv(file_name)
 res.aov = aov(Score ~ Handicap, data=raw_data)
-summary(res.aov)
-```
+res.lsd = LSD.test(res.aov, 'Handicap', p.adj = 'none')
+res.lsd$statistics['LSD']
+res.bonf = LSD.test(res.aov, 'Handicap', p.adj = 'bonferroni')
+res.bonf$statistics['MSD']
+res.tukey = HSD.test(res.aov, 'Handicap')
+res.tukey$statistics['MSD']
+res.scheffe = scheffe.test(res.aov, 'Handicap')
+res.scheffe$statistics['CriticalDifference']
 
-## Let's plot the fuck out of this!
-
-```{r education_data, echo=FALSE}
-# tak a random sample for good measure
-set.seed(1234)
-dplyr::sample_n(education_data, 10)
-education_data$LogIncome2005 = log(education_data$Income2005) 
-levels(education_data$Educ)
-#show some group stats
-group_by(education_data, Educ) %>% summarise(
-  count = n(),
-  mean = mean(LogIncome2005, na.rm = TRUE),
-  sd = sd(LogIncome2005, na.rm = TRUE)
-)
-ggboxplot(education_data, x='Educ', y='LogIncome2005', color = 'Educ',
-          palette=palette(rainbow(length(levels(education_data$Educ)))),
-          ylab = 'LogIncome2005', xlab = 'Educ'
-          )
-
-ggline(education_data, x = 'Educ', y = 'LogIncome2005', 
-       add = c('mean_se'), #(other values include: mean_sd, mean_ci, median_iqr,jitter ....)
-       ylab='LogIncome2005', xlab='Educ')
-```
-
-## Tukey Multiple Pairwise Comparisons
-
-```{r}
-TukeyHSD(res.aov)
-```
-
-## Let's calc the same thing using multcomp package 
-  
-    #(why doensn't this work?)
-```{r}
-#summary(glht(res.aov, linfct = mcp(Educ = 'Tukey')))
-
-```
-
-## pariwise t-test, because "Why not?"
-  
-  # creates a matrix of t-tests between classes
-```{r}
-pairwise.t.test(education_data$LogIncome2005, education_data$Educ,
-                p.adjust.method = 'BH')
-
-```
-
-## Check homogeneity of variance assumption
-```{r}
-plot(res.aov, 1)
-```
-
-## Levene's test for homogeneity of variance
-```{r}
-leveneTest(LogIncome2005 ~ Educ, data=education_data)
-```
-
-## Relaxed Homogeneity Tests
-  
-  - Welch one-way
-  
-  - paired t-test w/o equality of sd assumption)
-
-```{r}
-oneway.test(LogIncome2005 ~ Educ, data = education_data)
-pairwise.t.test(education_data$LogIncome2005, education_data$Educ, p.adjust.method = 'BH', pool.sd = FALSE)
-```
-
-## Check Normality Assumption
-
-```{r}
-# Q-Q plot of residuals
-plot(res.aov, 2)
-
-# Extract the residuals 
-aov_residuals = residuals(object = res.aov)
-
-#Shapiro-Wilke on residuals
-shapiro.test(x = aov_residuals)
-```
-
-## Non Parametric Tests (Kruskal-Wallis Ranksum Test)
-
-```{r}
-kruskal.test(LogIncome2005 ~ Educ, data=education_data)
-
-```
-
-## R Question 2 BYO ANOVA
-
-# Filter Data
-```{r}
-education_data_filtered = sqldf("SELECT * FROM education_data
-                                              WHERE Educ IN ('16', '>16')")
-
-```
-
-# verify quoted p-value
-
-```{r}
-t.test(LogIncome2005 ~ Educ, data= education_data_filtered, var.equal=TRUE)
-
+res.dunnet = glht(res.aov, linfct=mcp(Handicap='Dunnet'))
+summary(res.dunnet)
 ```

@@ -1,0 +1,60 @@
+---
+title: "Sean_Kennedy_HW6_DDS"
+author: "Sean Kennedy"
+date: "6/17/2019"
+output: html_document
+---
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+library(sqldf)
+library(ggplot2)
+load('data.RData')
+```
+
+## Question 1
+ # Part a/b)
+```{r}
+states = unique(trimws(mh2015_puf$LST))
+```
+ # Part c)
+```{r}
+mh2015_puf$LST = trimws(mh2015_puf$LST)
+non_mainland = c('AK', 'HI', 'VI', 'GU', 'PR', 'AS')
+filtered = mh2015_puf[!(mh2015_puf$LST %in% non_mainland), ]
+mainland_states = unique(filtered$LST)
+length(mainland_states) # dc included
+```
+  # Part d)
+
+```{r}
+filtered_counts = sqldf("SELECT LST, COUNT(*) as Total FROM filtered GROUP BY LST")
+state_plot = ggplot(filtered_counts, aes(x=filtered_counts$LST, y=filtered_counts$Total, fill=filtered_counts$LST)) + geom_bar(stat = "identity") + coord_flip() + labs(x = 'State', y='# Facilities', fill='State') 
+print(state_plot + ggtitle('Facilities by State') +
+  theme(plot.title = element_text(hjust = 0.5)))
+```
+  
+## Question 2
+```{r}
+state_data = read.csv('~/Documents/SMU/DoingDataScience/Homework/HW6/statesize.csv')
+merged_data = sqldf("SELECT 
+                      StateName
+                      , Region
+                      , SqMiles
+                      , SUM(Total) as FacilityCount
+                    FROM filtered_counts f 
+                    LEFT JOIN state_data s ON (CASE WHEN f.LST = 'DC' THEN 'VA' ELSE f.LST END) = s.Abbrev
+                    GROUP BY StateName, Region, SqMiles
+                    ")
+merged_data$FacilitiesPer1KSqMile = merged_data$FacilityCount/merged_data$SqMiles/1000
+
+state_plot_by_sq_mile = ggplot(merged_data, aes(x=reorder(merged_data$StateName,merged_data$FacilitiesPer1KSqMile) , y=merged_data$FacilitiesPer1KSqMile, fill=merged_data$Region)) + geom_bar(stat = "identity") + coord_flip() + labs(x = 'StateName', y='# Facilities/Sq Mile', fill='Region') 
+print(state_plot_by_sq_mile + ggtitle('Facilities/sq mile by State') +
+  theme(plot.title = element_text(hjust = 0.5)))
+```
+ 
+ "Facilities seem to be highly concentrated in the Northeast and very few facilities in the West (save for California).
+  Further analysis should be undertaken to study the number of veterans that are in each state/region. Simply assuming that the
+ geographic size of state is a good measure of the requisite number of VA hospitals is inadequate. Larger states could have larger
+ populations, but that is not a gurantee. This analysis would be better done by analyzing the number of hospitals per 1000 veterans, not 
+ per 1000 sq miles."
