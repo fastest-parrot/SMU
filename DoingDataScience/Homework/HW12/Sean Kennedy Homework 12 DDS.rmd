@@ -1,0 +1,37 @@
+---
+title: "Homework 12 DDS"
+author: "Sean Kennedy"
+date: "August 17, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(sqldf)
+library(xts)
+library(lubridate)
+library(TTR)
+theme_set(theme_minimal())
+
+```
+
+## Load data
+
+```{r}
+DAX_ts = EuStockMarkets[,1]
+dax_xts = xts(DAX_ts, as.Date(date_decimal(index(DAX_ts))))
+returns = diff(dax_xts, lag = 1, differences = 1)/dax_xts
+plot = ggplot(data=dax_xts) + geom_line(aes(x=Index, y=dax_xts),color='blue')  + 
+  geom_vline(xintercept=index(dax_xts)[1428], linetype=4, color='red')
+plot + ggtitle('DAX Price') + xlab('Date') + ylab('Price')
+
+```
+## Decompositions
+
+```{r}
+dax_xts
+
+dax_decomp = decompose(DAX_ts, type = 'multiplicative')
+
+```
