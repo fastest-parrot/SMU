@@ -16,7 +16,10 @@ library(ggplot2)
    # scatter plot the data
 ```{r}
 baseball_data = read.csv('Baseball_Data.csv')
+summary(baseball_data)
 ggplot(data=baseball_data, aes(x = baseball_data$Wins, y=baseball_data$Payroll)) + geom_point() + labs(x='Wins', y='Payroll') + geom_text(label=baseball_data$TEAM)
+baseball_lm = lm(Wins~Payroll, data=baseball_data)
+summary(baseball_lm)
 ```
 
 Observation of the scatter plot shows a generally positive relationship between payroll and wins. But the trend is not very strong, nor is it consistent. There are a multitude of teams (TEX, SD, CIN, TB) that were well under the median payroll that had very high win totals. Conversely, there were quite a few teams that had higher than average payrolls (CHC, NYM, DET) that had subpar win totals. At the upper end of the payroll range the Yankees had the highest payroll but only the 3rd highest win total - with a payroll that was more than the combined total of the two winngest teams (PHI and TB). A fair guess for a correlation coeffecient would be somewhere around +0.6
