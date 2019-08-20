@@ -12,6 +12,10 @@ library(sqldf)
 library(xts)
 library(lubridate)
 library(TTR)
+library(tsbox)
+library(fpp2)
+library(forecast)
+library(dygraphs)
 theme_set(theme_minimal())
 
 ```
@@ -27,11 +31,89 @@ plot = ggplot(data=dax_xts) + geom_line(aes(x=Index, y=dax_xts),color='blue')  +
 plot + ggtitle('DAX Price') + xlab('Date') + ylab('Price')
 
 ```
+
 ## Decompositions
 
 ```{r}
-dax_xts
 
-dax_decomp = decompose(DAX_ts, type = 'multiplicative')
+dax_decomp = stl(DAX_ts, s.window = 30)
+dax_decomp_df= ts_df(dax_decomp$time.series)
+write.csv(dax_decomp_df,'dax_decomp.csv')
+p = ggplot(dax_decomp_df, aes(x=time, y=value, color=id)) +
+  geom_line(aes(linetype=id)) + geom_vline(xintercept=dax_decomp_df[1428,]$time, linetype=4, color='red')
+p + ggtitle('DAX Decomposition') + xlab('Date')
+
+
+```
+
+## Question 2
+
+```{r maxtemp}
+
+forward_dates = seq(as.Date('2017-01-01'), as.Date("2021-01-01"), "years")
+dates = seq(as.Date('1990-01-01'), as.Date("2016-01-01"), "years")
+maxtemp_df = ts_df(ts_xts(maxtemp))
+maxtemp_df = maxtemp_df %>% filter(time >= as.Date('1990-01-01'))
+rownames(maxtemp_df) = maxtemp_df$time
+maxtemp_forecast = forecast(as.ts(maxtemp_df$value), h = 5, allow.multiplicative.trend = TRUE)
+
+prediction = cbind.data.frame(time=forward_dates, value=maxtemp_forecast$mean)
+rownames(prediction) = prediction$time
+fit = cbind.data.frame(time=dates, value=maxtemp_forecast$fitted)
+rownames(fit) = fit$time
+final_df = sqldf("SELECT *, 'Raw' as Type FROM 
+                 maxtemp_df 
+                 UNION ALL 
+                 SELECT *, 'Prediction' as Type FROM prediction
+                UNION ALL 
+                 SELECT *, 'Fit' as Type FROM fit")
+p_temp = ggplot(final_df, aes(x=time, y=value, color=Type)) +
+    geom_line(aes(linetype=Type))
+p_temp + ggtitle(glue::glue('Temp Prediction AIC {round(maxtemp_forecast$model$aic, 2)}')) + xlab('Date') + ylab('Temp Celsius')
+holt(as.ts(maxtemp_df$value))
+```
+
+## Running HOLT
+
+```{r}
+forward_dates = seq(as.Date('2017-01-01'), as.Date("2021-01-01"), "years")
+dates = seq(as.Date('1990-01-01'), as.Date("2016-01-01"), "years")
+maxtemp_forecast_holt = holt(as.ts(maxtemp_df$value), h = 5, allow.multiplicative.trend = TRUE, initial = "optimal", damped = TRUE)
+
+prediction_holt = cbind.data.frame(time=forward_dates, value=maxtemp_forecast_holt$mean)
+rownames(prediction_holt) = prediction_holt$time
+fit_holt = cbind.data.frame(time=dates, value=maxtemp_forecast_holt$fitted)
+rownames(fit_holt) = fit$time
+final_df_holt = sqldf("SELECT *, 'Raw' as Type FROM 
+                 maxtemp_df 
+                 UNION ALL 
+                 SELECT *, 'Prediction' as Type FROM prediction_holt
+                UNION ALL 
+                 SELECT *, 'Fit' as Type FROM fit_holt")
+p_temp_holt = ggplot(final_df_holt, aes(x=time, y=value, color=Type)) +
+    geom_line(aes(linetype=Type))
+p_temp_holt + ggtitle(glue::glue('Temp Prediction HOLT Model AIC {round(maxtemp_forecast_holt$model$aic, 2)}')) + xlab('Date') + ylab('Temp Celsius')
+
+```
+
+Since lower AIC is preferred - method 1 is better
+
+## Wands
+
+
+```{r}
+wand_dates = seq(as.Date('1970-01-01'), as.Date("2017-01-01"), "years")
+olliv = read.csv('Unit12TimeSeries_Ollivander.csv', header = FALSE, col.names = c('time', 'value'))
+grig = read.csv('Unit12TimeSeries_Gregorovitch.csv', header = FALSE, col.names = c('time', 'value'))
+olliv$time = as.Date(olliv$time, "%m/%d/%Y")
+grig$time = as.Date(olliv$time, "%m/%d/%Y")
+olliv_ts = xts(olliv, order.by = olliv$time)
+grig_ts = xts(grig, order.by=grig$time)
+all_data = cbind(Ollivar=olliv_ts, Grigor=grig_ts)
+dygraph(all_data, main = "Wand Sales") %>%
+  dyShading(from="1995-1-1", to="1999-1-1", color="#FFE6E6") %>%
+  dyRangeSelector() %>%
+  dyHighlight() %>%
+  dyOptions(colors = RColorBrewer::brewer.pal(3, "Set2"))
 
 ```

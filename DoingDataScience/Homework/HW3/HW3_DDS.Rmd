@@ -1,8 +1,26 @@
 ---
-title: "Sean Kennedy Doing Data Science: HW 3"
-output: html_notebook
+title: 'Sean Kennedy Doing Data Science: HW 3'
+output:
+  html_document:
+    df_print: paged
 ---
-
+```{r}
+summarize =function(x)
+{
+  report = data.frame(c('Median Age', 'Self Esteem','SE_SD', 'Duration Range'),c(apply(data.matrix(x[,c('Age')]), MARGIN = 2, FUN=median, na.rm=TRUE),apply(data.matrix(x[,c('RSES')]), MARGIN = 2, FUN=mean, na.rm=TRUE)/5, apply(data.matrix(x[,c('RSES')]), MARGIN = 2, FUN=sd, na.rm=TRUE), apply(data.matrix(x[,c('Duration')]), MARGIN = 2, FUN=max, na.rm=TRUE)-apply(data.matrix(x[,c('Duration')]), MARGIN = 2, FUN=min, na.rm=TRUE)))
+}
+```
+```{r}
+sets = c(data(package = 'fivethirtyeight'))
+sets$results[22,]
+df = fivethirtyeight::college_recent_grads
+names(df)
+length(names(df))
+major_count = data.frame(table(df$major_category))
+par(las=2)
+barplot(major_count$Freq, names.arg=major_count$Var1, horiz=TRUE, main = 'Major Selection',ylab = 'Major', xlab = 'Frequency', col = c('red'))
+write.csv(df[names(df)[2:length(names(df))]], file='fivethirtyeight.csv')
+```
 #Question 1: Git Code
 
 (base) Seans-MacBook-Pro:~ skennedy$ cd Documents/
@@ -43,16 +61,20 @@ Resolving deltas: 100% (1049/1049), done.
 
 
 ```{r echo=TRUE}
-titanic_data <- read.table(file = "~/Documents/SMU/DoingDataScience/Homework/HW3/GIT/awesome-public-datasets/Datasets/titanic.csv",header = T,sep = ","); # 
+
+titanic_data <- data.frame(Titanic)
 summary(titanic_data)
-#females <- titanic_data[which(titanic_data$Survived ==1)]
-females <- titanic_data[which(titanic_data$Sex =='female'), ]
-hist(females$Age, xlab = 'Age', ylab= 'Count', main = 'Female Passenger Age')
-hist(females$Survived, xlab = 'Survived', ylab= 'Count', main = 'Female Passenger Survival')
-males <- titanic_data[which(titanic_data$Sex =='male'), ]
-hist(males$Age, xlab = 'Age', ylab= 'Count', main = 'Male Passenger Age')
-hist(males$Survived, xlab = 'Survived', ylab= 'Count', main = 'Male Passenger Survival')
-means = apply(data.matrix(titanic_data[,c('Age', 'Fare', 'Survived')]), MARGIN = 2, FUN=mean, na.rm=TRUE)
+
+females <- titanic_data[which(titanic_data$Sex =='Female'), ]
+females_survived <- titanic_data[which(females$Survived =="Yes"),]
+hist(females$Freq, xlab = 'Age', ylab= 'Count', main = 'Female Passenger Age')
+hist(females_survived$Freq, xlab = 'Survived', ylab= 'Count', main = 'Female Passenger Survival')
+males <- titanic_data[which(titanic_data$Sex =='Male'), ]
+males_survived <- titanic_data[which(titanic_data$Survived =='Yes'), ]
+
+hist(males$Freq, xlab = 'Age', ylab= 'Count', main = 'Male Passenger Age')
+hist(males_survived$Freq, xlab = 'Survived', ylab= 'Count', main = 'Male Passenger Survival')
+means = apply(data.matrix(titanic_data[,c('Age', 'Survived')]), MARGIN = 2, FUN=mean, na.rm=TRUE)
 real = means == Re(means)
 ```
 ```{r}
@@ -65,23 +87,7 @@ RSES = c(apply(data.matrix(sleep_data[,c('RSES')]), MARGIN = 2, FUN=mean, na.rm=
 summary = t(summarize(sleep_data))
 
 ```
-```{r}
-summarize =function(x)
-{
-  report = data.frame(c('Median Age', 'Self Esteem','SE_SD', 'Duration Range'),c(apply(data.matrix(x[,c('Age')]), MARGIN = 2, FUN=median, na.rm=TRUE),apply(data.matrix(x[,c('RSES')]), MARGIN = 2, FUN=mean, na.rm=TRUE)/5, apply(data.matrix(x[,c('RSES')]), MARGIN = 2, FUN=sd, na.rm=TRUE), apply(data.matrix(x[,c('Duration')]), MARGIN = 2, FUN=max, na.rm=TRUE)-apply(data.matrix(x[,c('Duration')]), MARGIN = 2, FUN=min, na.rm=TRUE)))
-}
-```
-```{r}
-sets = c(data(package = 'fivethirtyeight'))
-sets$results[22,]
-df = fivethirtyeight::college_recent_grads
-names(df)
-length(names(df))
-major_count = data.frame(table(df$major_category))
-par(las=2)
-barplot(major_count$Freq, names.arg=major_count$Var1, horiz=TRUE, main = 'Major Selection',ylab = 'Major', xlab = 'Frequency', col = c('red'))
-write.csv(df[names(df)[2:length(names(df))]], file='fivethirtyeight.csv')
-```
+
 
 ```{r}
 datasets <- read.csv("https://goo.gl/OT8iHa") 
