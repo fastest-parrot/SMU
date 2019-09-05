@@ -177,7 +177,7 @@ non_factor_columns <- function(dataFrame){
   
    
 ```{r, echo=FALSE}
-glucose_data = loadData('GlucoseGeneStudy_mod.csv')
+glucose_data =  loadData('GlucoseGeneStudy.csv')
 glucose_data$Glucose = as.double(glucose_data$Glucose)
 glucose_data$Gender = factor(glucose_data$Gender)
 glucose_data$Race = factor(glucose_data$Race)
@@ -216,5 +216,31 @@ test_data = loadData('GlucoseGeneStudy_mod.csv')
 
 simpler_model = lm(data=test_data, formula = Glucose ~ X10+log(X4)+X16+X17+X28+X29)
 summary(simpler_model)
+confint(simpler_model)
 ```
+```{r}
+plot_prediction_and_confidence = function(model, data, predictor, target, level=0.99){
 
+plot = ggplot(data=data, aes(x=data[,predictor], y=data[,target])) +
+  geom_point(color='Blue', size = 2) +
+  geom_smooth(method = lm, se=TRUE, level=alpha, color='Red')
+
+input = data[, predictor]
+
+str(data.frame(predictor = sort(input)))
+predictions_cl = predict(model, newdata = data.frame(predictor = sort(input)), interval = c('predict'), type=c('response'), level=level)
+
+regress_cl = predict(model, newdata = data.frame(predictor = sort(input)), interval = c('confidence'), type=c('response'), level=level)
+
+plot +
+  geom_line(data=data.frame(predictions_cl), aes(x=sort(input), y=upr), color='Green') +
+  geom_line(data=data.frame(predictions_cl), aes(x=sort(input), y=lwr), color='Green') +
+  geom_line(data=data.frame(regress_cl), aes(x=sort(input), y=upr), color='Blue') +
+  geom_line(data=data.frame(regress_cl), aes(x=sort(input), y=lwr), color='Blue')
+}
+
+plot_prediction_and_confidence(simpler_model, test_data, 'X10', 'Glucose', 0.99 )
+
+sort(test_data[, 'X10'])
+
+```

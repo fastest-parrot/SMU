@@ -1,0 +1,51 @@
+---
+title: "Sean Kennedy HW 12"
+author: "Sean Kennedy"
+date: "8/18/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(sqldf)
+library(tidyquant)
+```
+
+```{r}
+b_data = read.csv('Brain.csv')
+pairs(~ Brain + Body + Gestation + Litter, data=b_data)
+
+```
+
+## Crappy - let's log it!
+
+```{r}
+b_data$Brain_log = log(b_data$Brain)
+b_data$Body_log = log(b_data$Body)
+b_data$Gestation_log = log(b_data$Gestation)
+b_data$Litter_log = log(b_data$Litter)
+
+pairs(~ Brain_log + Body_log + Gestation_log + Litter_log, data=b_data)
+log_model = lm(data=b_data, formula = Brain_log ~ Body_log + Gestation_log + Litter_log)
+summary(log_model)
+plot(log_model)
+```
+
+## Assumptions of normality, heteroscedascity, linearity and indepedence (?) are all met for the log transformed data
+
+ ln(brain)=0.85+0.58⋅ln(body)+0.42⋅ln(gestation)-0.31⋅ln(litter)
+ 
+Res Plot- slight funnel shape, but not terrible
+
+Stud Res Plot- observations 53 and 25 look suspect
+
+Q-Q: Normal
+
+Histogram of Residuals: also normal
+
+
+Interpretation
+
+
+Since this was a log/log model we can only say that a doubling in the input results in a 1.34x multiplicative change in the median brain size. 

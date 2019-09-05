@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(sqldf)
 library(tidyverse)
 library(investr)
+library(Sleuth3)
 ```
 
 ```{r, echo=FALSE}
@@ -224,4 +225,14 @@ cor(bird_data$Mass, bird_data$Tcell)^2
     
 ## Question 2
 
+```{r}
+sleuth_data = Sleuth3::ex0727
+write.csv(sleuth_data, 'sleuth_data.csv')
+lm_sleuth = lm(data=sleuth_data, formula = Tcell ~ Mass)
+summary(lm_sleuth)
+confint(lm_sleuth, level=0.99)
+
+```
+
+## See Attached Excel for Rest of Analysis
   
