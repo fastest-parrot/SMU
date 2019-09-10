@@ -14,8 +14,6 @@ library(investr)
 
 ```{r, echo=FALSE}
 
-df = 93
-alpha = .05
 
 critical_t = function(alpha, df, two_sided=TRUE){
   if(two_sided){
@@ -50,184 +48,215 @@ summary(metabolic_data)
   Assess relationship between mass metabolic rate:
   
   {meta|mass}: meta = B0 + B1(mass)
+  
+  or
+  
+  {meta|mass_.75}: meta = B0 + B1(mass)
 
 ```{r}
 ggplot(data=metabolic_data) + 
   geom_point(aes(x=Mass, y=Metab), color='Red') +
-  geom_point(aes(x=Mass_mod, y=Metab), color='Blue') + 
-  geom_label()
+  geom_point(aes(x=Mass_mod, y=Metab), color='Blue') 
+  
 ```
 
-## Data does appear to be linear for both inputs (mass and mass)
+## Data does appear to be linear for both inputs (mass and mass^0.75) 
+    
+    Trend is stronger for X^3/4
+
+```{r}
+
+mass_model = lm(data=metabolic_data, formula = Metab ~ Mass_mod)
+summary(mass_model)
+```
+    
+
 
 
 ## Plot CL
 
 ```{r}
-bird_plot = ggplot(bird_data, aes(x=Mass, y=Tcell)) + 
-  geom_point(color='Blue', size = 2) + 
+bird_plot = ggplot(metabolic_data, aes(x=Mass_mod, y=Metab)) +
+  geom_point(color='Blue', size = 2) +
   geom_smooth(method = lm, se=TRUE, level=0.99, color='Red')
 
-predictions_cl = predict(linear_model, newdata = data.frame(Mass = sort(bird_data$Mass)), interval = c('predict'), type=c('response'), level=0.99)
+predictions_cl = predict(mass_model, newdata = data.frame(Mass_mod = sort(metabolic_data$Mass_mod)), interval = c('predict'), type=c('response'), level=0.99)
 
-regress_cl = predict(linear_model, newdata = data.frame(Mass = sort(bird_data$Mass)), interval = c('confidence'), type=c('response'), level=0.99)
+regress_cl = predict(mass_model, newdata = data.frame(Mass_mod = sort(metabolic_data$Mass_mod)), interval = c('confidence'), type=c('response'), level=0.99)
 
-bird_plot + 
-  geom_line(data=data.frame(predictions_cl), aes(x=sort(bird_data$Mass), y=upr), color='Green') +
-  geom_line(data=data.frame(predictions_cl), aes(x=sort(bird_data$Mass), y=lwr), color='Green') +
-  geom_line(data=data.frame(regress_cl), aes(x=sort(bird_data$Mass), y=upr), color='Blue') +
-  geom_line(data=data.frame(regress_cl), aes(x=sort(bird_data$Mass), y=lwr), color='Blue')
+bird_plot +
+  geom_line(data=data.frame(predictions_cl), aes(x=sort(metabolic_data$Mass_mod), y=upr), color='Green') +
+  geom_line(data=data.frame(predictions_cl), aes(x=sort(metabolic_data$Mass_mod), y=lwr), color='Green') +
+  geom_line(data=data.frame(regress_cl), aes(x=sort(metabolic_data$Mass_mod), y=upr), color='Blue') +
+  geom_line(data=data.frame(regress_cl), aes(x=sort(metabolic_data$Mass_mod), y=lwr), color='Blue')
 ```
-
-## Six Step for each parameter:
-  
-    - Intercept:
-    
-    H0: B0 = 0
-    Ha: B0 <> 0
-    
-    Critical Values:
-    
-    N = 21
-    df = 21 - k = 21 - 2 = 19
-    alpha = 0.01 (99% CL)
-    t_critical = 2.861 (2-sided)
-  
-    test stat: 1.112
-    
-    p-value: 0.28
-    
-    Fail to reject H0
-    
-    There is not sufficient evidence to show that the intercept parameter B0 is not equal to zero (p-value = 0.28 at alpha of 0.01). Confidence intervals for this estimate are below. This interpretation cannot be extended to a larger population since this was not a random sample. Causal inference is also not possible due to the nature of the observational study.
-    
 ```{r}
-
-t = critical_t(alpha, df)
-p_b0 = p_val(1.112, df)
+plot(mass_model)
 ```
 
-  - Slope parameter:
-  
-    H0: B1 = 0
-    Ha: B1 <> 0
-    
-    *Same critical value analysis as above*
-    
-    test stastic: 3.084
-    
-    p-value: 0.0061
-    
-```{r}
-p_b1 = p_val(3.084, df)
-```
-
-    Strong statistical evidence that the slope parameter B1 is not equal to zero. In layman's terms - there exists strong evidence of a linear relationship between the ability to carry mass and health of the immune system. This interpretation cannot be extended to a larger population since this was not a random sample. Causal inference is also not possible due to the nature of the observational study. There may also be confounding variables that contribute to the ability to carry objects - namely the size of the brird. 
-  
-
-
-## Confidence Intervals:
-
-```{r}
-confint(linear_model, level = 0.99)
-
-```
-
-- Regression equation:
-
-  Tmean = 0.0875 + 0.0328(Mass)
-
-- Slope:
-
-  For every 1g increase in mass the expected change in T-cell count is 0.0328
-  
-- Intercept:
-
-  Baseline T-cell response = 0.0875 (the reponse when mass = 0, which sounds like a dead animal)
-  
-
-```{r}
-
-prediction_at_target = predict(linear_model, newdata = data.frame(Tcell = NA, Mass=4.5), interval = "confidence", level=0.99)
-prediction_at_target
-
-```
-
-## Extend analysis
+## Try log transform
 
 
 ```{r}
-test_input = 0:25
-test_y = rep(0.3, 26)
+log_data = metabolic_data
+log_data$Meta_log = log(log_data$Metab)
+log_data$Mass_mod_log = log(log_data$Mass_mod)
+ggplot(data=log_data) + 
+  geom_point(aes(x=Mass_mod_log, y=Meta_log), color='Red') +
+  geom_point(aes(x=Mass_mod_log, y=Meta_log), color='Blue') 
 
-prediction_confidence = predict(linear_model, newdata = data.frame(Mass=test_input), interval = c("confidence"), type = c("response"), level =0.99) 
+log_model = lm(data=log_data, formula = Meta_log ~ Mass_mod_log)
 
-prediction_predict = predict(linear_model, newdata = data.frame(Mass=test_input), interval = c("predict"), type = c("response"), level =0.99) 
+bird_plot = ggplot(log_data, aes(x=Mass_mod_log, y=Meta_log)) +
+  geom_point(color='Blue', size = 2) +
+  geom_smooth(method = lm, se=TRUE, level=0.99, color='Red')
 
+predictions_cl = predict(log_model, newdata = data.frame(Mass_mod_log = sort(log_data$Mass_mod_log)), interval = c('predict'), type=c('response'), level=0.99)
 
-ggplot() + 
-  geom_line(data=data.frame(prediction_confidence), aes(x=sort(test_input), y=upr), color='Green', lty=3) +
-  geom_line(data=data.frame(prediction_confidence), aes(x=sort(test_input), y=lwr), color='Green', lty=3) +
-  geom_line(data=data.frame(prediction_predict), aes(x=sort(test_input), y=upr), color='Blue', lty=3) +
-  geom_line(data=data.frame(prediction_predict), aes(x=sort(test_input), y=lwr), color='Blue', lty=3) + 
-  geom_line(data=data.frame(prediction_predict), aes(x=sort(test_input), y=fit), color='Red') + 
-  geom_point(data=bird_data, aes(x=Mass, y=Tcell), color='Black') + 
-  geom_line(aes(x=test_input, y=test_y), color='Purple', lty=2) + 
-  geom_vline(aes(xintercept=22)) +
-  xlab('Mass') + 
-  ylab('T-Cell') +
-  ggtitle('T-Cell vs Mass')
+regress_cl = predict(log_model, newdata = data.frame(Mass_mod_log = sort(log_data$Mass_mod_log)), interval = c('confidence'), type=c('response'), level=0.99)
 
+bird_plot +
+  geom_line(data=data.frame(predictions_cl), aes(x=sort(log_data$Mass_mod_log), y=upr), color='Green') +
+  geom_line(data=data.frame(predictions_cl), aes(x=sort(log_data$Mass_mod_log), y=lwr), color='Green') +
+  geom_line(data=data.frame(regress_cl), aes(x=sort(log_data$Mass_mod_log), y=upr), color='Blue') +
+  geom_line(data=data.frame(regress_cl), aes(x=sort(log_data$Mass_mod_log), y=lwr), color='Blue')
+
+m<-mean(log_model$residuals)
+std<-sqrt(var(log_model$residuals))
+hist(log_model$residuals, breaks=20, prob=TRUE, 
+     xlab="x-variable", ylim=c(0, 2), 
+     main="normal curve over histogram") 
+curve(dnorm(x, mean=m, sd=std), 
+      col="darkblue", lwd=2, add=TRUE, yaxt="n")
+plot(log_model)
 ```
 
- *At a single response of 0.3 the prediction interval is from zero to 22g from inspection*
+## Much Better to use log/log
 
-## Mean response
+   Meets assumptions for normality, linearity, equal variance and independence 
+   
+   Outliers are not an issue according to Cookd measures
+
+
 ```{r}
-calibrate(linear_model, y0=0.3, interval = 'inversion', mean.response = T, level = 0.99)
+summary(log_model)
+confint(log_model)
 
 ```
+## Regression Equation
 
-## Single Response
-```{r}
-calibrate(linear_model, y0=0.3, interval = 'inversion', level = 0.99)
-
-```
+{log(Meta):log(Mass)}: B0 + B1log(Mass) = 5.64 + 0.98log(Mass)
 
 ## Interpretation
 
-  - Mean response:
-    
-    @99% confidence - we estimate that to observe a mean t-cell repsonse of 0.3, the mass should be between 0 and 8.3
-    
-    
-   - Single response:
-    
-    @99% confidence - we estimate that to observe an individual t-cell repsonse of 0.3, the mass should be between 0 and 21.92g
-    
-
-## Residual Scatter:
-
-```{r}
-res = resid(object = linear_model)
-ggplot() + geom_point(aes(y=res, x=bird_data$Mass)) + xlab('Mass') + ylab('T-Cell Residual') + ggtitle('Residual Plot')
-
-student = rstudent(linear_model)
-x = seq(min(student), max(student), length=50)
-normal = (dnorm(x))
-
-ggplot() + geom_histogram(aes(x=student, y =..density..), binwidth = 1, frequency=FALSE, fill='LightGreen') + geom_line(aes(x=x, y=normal), color='Red') + ggtitle('Studentized Residuals')
-
-```
-
-## Verify R2
+  A doubling of the mass corresponds to a 98% increase in the expected median of Metabolic activity
   
-```{r}
-cor(bird_data$Mass, bird_data$Tcell)^2
-```
-
-33.3% of the overall variance in T-cell count is explained by the ability to carry stones
-    
+  A 95% confidence interval for this effect is [94%, 102%]
+  
+  96% of the variability is explained by the model
+  
+  
 ## Question 2
 
+```{r}
+autism_data = read.csv('Autism Data Prob 29.csv')
+summary(autism_data)
+autism_model = lm(data=autism_data, formula = Prevalence ~ Year)
+summary(autism_model)
+plot(autism_model)
+
+ggplot(data=autism_data) + 
+  geom_point(aes(x=Year, y=Prevalence), color='Red') +
+  geom_point(aes(x=Year, y=Prevalence), color='Blue') 
+
+autism_model = lm(data=autism_data, formula = Prevalence ~ Year)
+
+bird_plot = ggplot(autism_data, aes(x=Year, y=Prevalence)) +
+  geom_point(color='Blue', size = 2) +
+  geom_smooth(method = lm, se=TRUE, level=0.99, color='Red')
+
+predictions_cl = predict(autism_model, newdata = data.frame(Year = sort(autism_data$Year)), interval = c('predict'), type=c('response'), level=0.99)
+
+regress_cl = predict(autism_model, newdata = data.frame(Year = sort(autism_data$Year)), interval = c('confidence'), type=c('response'), level=0.99)
+
+bird_plot +
+  geom_line(data=data.frame(predictions_cl), aes(x=sort(autism_data$Year), y=upr), color='Green') +
+  geom_line(data=data.frame(predictions_cl), aes(x=sort(autism_data$Year), y=lwr), color='Green') +
+  geom_line(data=data.frame(regress_cl), aes(x=sort(autism_data$Year), y=upr), color='Blue') +
+  geom_line(data=data.frame(regress_cl), aes(x=sort(autism_data$Year), y=lwr), color='Blue')
+
+m<-mean(autism_model$residuals)
+std<-sqrt(var(autism_model$residuals))
+hist(autism_model$residuals, breaks=20, prob=TRUE, 
+     xlab="x-variable", ylim=c(0, 2), 
+     main="normal curve over histogram")
+curve(dnorm(x, mean=m, sd=std), 
+      col="darkblue", lwd=2, add=TRUE, yaxt="n")
+plot(autism_model)
+
+```
+
+## This model is trash - transformers GO!
+
+    Log Linear
+    
+```{r}
+log_data = autism_data
+log_data$Prevalence_log = log(log_data$Prevalence)
+
+autism_model = lm(data=log_data, formula = Prevalence_log ~ Year)
+summary(autism_model)
+plot(autism_model)
+
+ggplot(data=log_data) + 
+  geom_point(aes(x=Year, y=Prevalence_log), color='Red') +
+  geom_point(aes(x=Year, y=Prevalence_log), color='Blue') 
+
+autism_model = lm(data=log_data, formula = Prevalence_log ~ Year)
+
+bird_plot = ggplot(log_data, aes(x=Year, y=Prevalence_log)) +
+  geom_point(color='Blue', size = 2) +
+  geom_smooth(method = lm, se=TRUE, level=0.99, color='Red')
+
+predictions_cl = predict(autism_model, newdata = data.frame(Year = sort(log_data$Year)), interval = c('predict'), type=c('response'), level=0.99)
+
+regress_cl = predict(autism_model, newdata = data.frame(Year = sort(log_data$Year)), interval = c('confidence'), type=c('response'), level=0.99)
+
+bird_plot +
+  geom_line(data=data.frame(predictions_cl), aes(x=sort(log_data$Year), y=upr), color='Green') +
+  geom_line(data=data.frame(predictions_cl), aes(x=sort(log_data$Year), y=lwr), color='Green') +
+  geom_line(data=data.frame(regress_cl), aes(x=sort(log_data$Year), y=upr), color='Blue') +
+  geom_line(data=data.frame(regress_cl), aes(x=sort(log_data$Year), y=lwr), color='Blue')
+
+m<-mean(autism_model$residuals)
+std<-sqrt(var(autism_model$residuals))
+hist(autism_model$residuals, freq = TRUE, breaks=20) 
+curve(dnorm(x, mean=m, sd=std), 
+      col="darkblue", lwd=2, add=TRUE, yaxt="n")
+plot(autism_model)
+
+```
+
+
+
+# Much better!
+
+  Still very hard to run a regression for such a small sample - but that's the assigment... sooooo
   
+  Meets assumptions for normality, linearity, equal variance and independence 
+   
+  Outliers are not an issue according to Cookd measures
+
+## Regression Equation
+
+{log(Prevalence):Year)}: B0 + B1Year = -408 + 0.020Year
+
+## Interpretation
+
+  A multiplicative effect of year on prevalance of 23% is predicted by the model
+  
+  A 95% confidence interval for this effect is [22%, 24%]
+  
+  99% of the variability is explained by the model
+  
+  (note that there is no reason to suspect that year should be a part of this model, model is nonsense)
