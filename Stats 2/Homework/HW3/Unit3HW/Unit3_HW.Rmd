@@ -24,12 +24,26 @@ The student may provide there answers in a seperate word document.  Just make su
 
   1.  State the necessary assumptions for Two Way ANOVA analysis to beconducted. Note: That addative versus non additivie is not a component of the assumptions
   
+  - The dependent variable is continuous
+  
+  - Independent variable are categorical (if not, then this is a multiple linear regression problem)
+  
+  - Independence - within and amongts groups
+  
+  - Equal variance amongst groups
+  
+  - Groups are normally distributed
+  
+  
   
   2.  State in words what it means for there to be an "interaction" between two explanatory variables. Note: Do not explain the meaning in terms of a graph with parallel lines.  
+  
+  - An interaction between variables accounts for their combined effect on the dependent variable. An example could be age and sex. If one had three categories of age (child, adult, elderly) and 2 for sex (M/F) - one could examine if the combination of age/sex has an influence on the dependent variable by including interaction terms for each categorical combination.
   
   
   3.  What is the family wise error rate?  What is multiple testing and why is it an issue when conducting ANOVA type models such as Two Way ANOVA?
   
+  - The familywise error rate is the likelihood of getting a false conclusion in a series of hypotheis tests. In an ANOVA test where there are no pre-planned comparisons (i.e all comparisons and contrasts are run) - the tests are run as a family and there is a corresponding increase in the type 1 error rate. Correction methods, such as Bonferroni must be used in order to account for the widening of confidence intervals.
   
   4.  True or False?  The overall Type-III sums of squares F-test's allow the analyst to determine where specific differences lie between levels of the factor.
   
@@ -49,8 +63,8 @@ ACT<-read.csv("MathACT.csv")
 
 attach(ACT)
 mysummary<-function(x){
-  result<-c(length(x),mean(x),sd(x),sd(x)/length(x))
-  names(result)<-c("N","Mean","SD","SE")
+  result<-c(length(x),mean(x),sd(x),sd(x)/length(x), min(x), max(x), IQR(x))
+  names(result)<-c("N","Mean","SD","SE","Min", "Max", "IQR")
   return(result)
 }
 sumstats<-aggregate(Score~Background*Sex,data=ACT,mysummary)
@@ -77,7 +91,32 @@ __HOMEWORK QUESTION__
 
 1.  Modify the previous R script so that the summary table also includeds the min, the max, and IQR.  These functions are all self explanatory...min(x), max(x), IQR(x).
 
+
+```{r}
+mysummary<-function(x){
+  result<-c(length(x),mean(x),sd(x),sd(x)/length(x), min(x), max(x), IQR(x))
+  names(result)<-c("N","Mean","SD","SE","Min", "Max", "IQR")
+  return(result)
+}
+sumstats<-aggregate(Score~Background*Sex,data=ACT,mysummary)
+sumstats<-cbind(sumstats[,1:2],sumstats[,-(1:2)])
+sumstats
+
+```
+
 2. Create another means plot but rather than using the standard errors (SE) to make the error bars.  Make it with the raw standard deviations (SD).  Which graphic (compared to plot using SE) is more telling about the assumption of equal variances for the ANOVA model?  Give a little explanation for your answer.
+
+```{r}
+ggplot(sumstats,aes(x=Background,y=Mean,group=Sex,colour=Sex))+
+  ylab("ACT Score")+
+  geom_line()+
+  geom_point()+
+  geom_errorbar(aes(ymin=Mean-SD,ymax=Mean+SD),width=.1)
+
+```
+
+### The standard error variant is impossible to interpret because the values are adjusted for sample size. Standard deviation is not adusted for sample size and hence is on an order of magnitude similar to the response variable (ACT Score)
+
 
 
 ## Exercise #2  Conducting a Two Way ANOVA Analysis in R
@@ -85,6 +124,9 @@ __HOMEWORK QUESTION__
 Since Two Way ANOVA's are techically just special cases of multiple linear regression, it's not to suprising that the same function call is used to build the model.  After viewing and exploring the data via Exercise 1.  The next step would be to fit a full nonaddative model, check the assumptions of the model, and then examine the type III sums of squares F tables.
 
 The following code fits the nonadditive two way anova model and then produces the first the main residual diagnostics for assumption checking. The syntax for including interaction terms is slightly different so please make note.
+
+
+
 ```{r modelfit }
 model.fit<-aov(Score~Background+Sex+Background:Sex,data=ACT)
 par(mfrow=c(1,2))
@@ -143,7 +185,7 @@ As discussed in class, including all possible combinations of comparisons may be
 The following script allow you to write out your contrasts in a more verbal syntax. I'll run you through the most tedious scenario.  The script can be easily modified to handle simpler situations.  First things first, all you need to do is provide some details as to what comparisons you'd like to make.  Suppose, that if the interaction was significant, the only meaningful comparisons to make in the analysis comparing males versus females for each level of background.  
 ```{r}
 
-library(lsmeans) #maybe need eemeans package
+library(emmeans) #maybe need eemeans package
 contrast.factor<-~Background*Sex
 mycontrast<-c("amale-afemale","bmale-bfemale","cmale-cfemale")
 dat<-ACT
