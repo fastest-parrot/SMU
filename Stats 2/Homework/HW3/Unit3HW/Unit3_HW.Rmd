@@ -24,18 +24,23 @@ The student may provide there answers in a seperate word document.  Just make su
 
   1.  State the necessary assumptions for Two Way ANOVA analysis to beconducted. Note: That addative versus non additivie is not a component of the assumptions
   
+  
   2.  State in words what it means for there to be an "interaction" between two explanatory variables. Note: Do not explain the meaning in terms of a graph with parallel lines.  
+  
   
   3.  What is the family wise error rate?  What is multiple testing and why is it an issue when conducting ANOVA type models such as Two Way ANOVA?
   
+  
   4.  True or False?  The overall Type-III sums of squares F-test's allow the analyst to determine where specific differences lie between levels of the factor.
+  
+  
   
 ## Exercise #1  ACT Scores Revisited
 The first step in any analysis is appropriately describing the data both numerically and visually.  For a Two Way ANOVA analysis, one of the most helpful visual tools is the mean profile plot (with or without the raw data).
 The following code reads in the ACT data set from our pre live discussion and provides a handy, modifiable, function that can make a quick summary statistics table really quick. 
   
 ```{r summaries}
-setwd("D:/MSDS6372/HWMark")
+#setwd("D:/MSDS6372/HWMark")
 
 ACT<-read.csv("MathACT.csv")
 
