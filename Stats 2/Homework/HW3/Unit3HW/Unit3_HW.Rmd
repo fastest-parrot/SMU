@@ -246,6 +246,20 @@ head(ex1317)
 
 1.  Provide a means plot of the data.  Use this along with any additional information to comment on whether an addative or nonadditive model is probably the most appropriated.  If it is not obvious that is okay just do your best.
 
+```{r}
+ex1317.summary 
+ex1317.summary<-aggregate(Score~Background*Sex,data=ACT,mysummary)
+ex1317.summary<-cbind(sumstats[,1:2],sumstats[,-(1:2)])
+sumstats
+ggplot(sumstats,aes(x=Background,y=Mean,group=Sex,colour=Sex))+
+  ylab("ACT Score")+
+  geom_line()+
+  geom_point()+
+  geom_errorbar(aes(ymin=Mean-SD,ymax=Mean+SD),width=.1)
+
+```
+
+
 2.  Fit a nonadditive 2 way anova model to the data set and provide the residual diagnostics.  Comment on the appropriateness of the current anova fit.
 
 3.  Provide the type 3 ANOVA F-tests.  Answer the following question using the table.  Do the potential changes in mean Iridium by strata depend on the depth?
