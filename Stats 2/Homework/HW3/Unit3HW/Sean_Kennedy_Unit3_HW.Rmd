@@ -2,7 +2,7 @@
 title: "Unit3 HW"
 author: "Turner"
 date: "12/16/2018"
-output: word_document
+output: html_document
 ---
 
 ## HW Instructions
@@ -22,7 +22,7 @@ The student may provide there answers in a seperate word document.  Just make su
 
 ## ANOVA Conceptual questions
 
-  1.  State the necessary assumptions for Two Way ANOVA analysis to beconducted. Note: That addative versus non additivie is not a component of the assumptions
+# 1.  State the necessary assumptions for Two Way ANOVA analysis to beconducted. Note: That addative versus non additivie is not a component of the assumptions
   
   - The dependent variable is continuous
   
@@ -36,17 +36,18 @@ The student may provide there answers in a seperate word document.  Just make su
   
   
   
-  2.  State in words what it means for there to be an "interaction" between two explanatory variables. Note: Do not explain the meaning in terms of a graph with parallel lines.  
+#  2.  State in words what it means for there to be an "interaction" between two explanatory variables. Note: Do not explain the meaning in terms of a graph with parallel lines.  
   
   - An interaction between variables accounts for their combined effect on the dependent variable. An example could be age and sex. If one had three categories of age (child, adult, elderly) and 2 for sex (M/F) - one could examine if the combination of age/sex has an influence on the dependent variable by including interaction terms for each categorical combination.
   
   
-  3.  What is the family wise error rate?  What is multiple testing and why is it an issue when conducting ANOVA type models such as Two Way ANOVA?
+#  3.  What is the family wise error rate?  What is multiple testing and why is it an issue when conducting ANOVA type models such as Two Way ANOVA?
   
   - The familywise error rate is the likelihood of getting a false conclusion in a series of hypotheis tests. In an ANOVA test where there are no pre-planned comparisons (i.e all comparisons and contrasts are run) - the tests are run as a family and there is a corresponding increase in the type 1 error rate. Correction methods, such as Bonferroni must be used in order to account for the widening of confidence intervals.
   
-  4.  True or False?  The overall Type-III sums of squares F-test's allow the analyst to determine where specific differences lie between levels of the factor.
-  
+#  4.  True or False?  The overall Type-III sums of squares F-test's allow the analyst to determine where specific differences lie between levels of the factor.
+   
+    - False - this test is for determining whether or not there is a signifcant effect from interaction terms. Contrasts should be performed to determine differences between specifical levels of a factor.
   
   
 ## Exercise #1  ACT Scores Revisited
@@ -132,6 +133,7 @@ model.fit<-aov(Score~Background+Sex+Background:Sex,data=ACT)
 par(mfrow=c(1,2))
 plot(model.fit$fitted.values,model.fit$residuals,ylab="Resdiduals",xlab="Fitted")
 qqnorm(model.fit$residuals)
+summary(model.fit)
 ```
 
 The previous graphics are not very pretty.  We can use the ggplot2 package to jazz things up a bit.
@@ -233,6 +235,13 @@ __HOMEWORK QUESTION__
 
 1.  Consider comparing the mean ACT scores of males versus females specifically for background A.  Compare the outputs from the Tukey comparison result table to that of the output generated from my manual contrast maker.  Is the estimated differences the same?  Can you explain why are the adjusted p-values different for the two result tables?  One would suggest that we reject the null while the other would have us to fail to reject. (This is just a conceptual thinking question. The interaction term is not significant for this data analysis.)
 
+#According to the TukeHSD - the adjusted p-value is 0.0854 (not signifcant at an alpha level of 0.05) and is alread adjusted for the family-wise error rate. The contrast - on the other hand - is not adjusted for multiple comparisons though the bonferroni adjustment would account for the multiple comparison error rate (0.0081 non-adjusted pvalue vs 0.024165 bf adjusted)
+
+#Tukey (Fail to Reject)
+a:male-a:female     2.3851626  -0.1797967   4.950122 0.0854058
+  
+#Contrast
+amale-afemale    2.385 0.898 855 2.656   0.0081  0.024165
 
 
 ## Exercise #3  
@@ -242,17 +251,21 @@ Lets examine the dta Exercise 13.17 from the statistical sleuth book.  The data 
 ```{r}
 library(Sleuth3)
 head(ex1317)
+attach(ex1317)
+
 ```
 
 1.  Provide a means plot of the data.  Use this along with any additional information to comment on whether an addative or nonadditive model is probably the most appropriated.  If it is not obvious that is okay just do your best.
 
+# The dataset appears to be non-linear. Means for both strata show a spike at a DepthCat of 3 and a tail off after that value. Despite the fact that both strata appear are nonlinear in their reltaionship to to depth - they both also appear to share the same slopes, hence an additive model seems most appropriate (i.e interaction effects should be ingnored)
+
 ```{r}
-ex1317.summary 
-ex1317.summary<-aggregate(Score~Background*Sex,data=ACT,mysummary)
-ex1317.summary<-cbind(sumstats[,1:2],sumstats[,-(1:2)])
-sumstats
-ggplot(sumstats,aes(x=Background,y=Mean,group=Sex,colour=Sex))+
-  ylab("ACT Score")+
+ex1317.summary<-aggregate(Iridium~Strata*DepthCat,data=ex1317,mysummary)
+ex1317.summary<-cbind(ex1317.summary[,1:2],ex1317.summary[,-(1:2)])
+ex1317.summary
+ex1317.summary[is.na(ex1317.summary)] = 0
+ggplot(ex1317.summary,aes(x=DepthCat,y=Mean,group=Strata,colour=Strata))+
+  ylab("Iridium")+
   geom_line()+
   geom_point()+
   geom_errorbar(aes(ymin=Mean-SD,ymax=Mean+SD),width=.1)
@@ -262,7 +275,189 @@ ggplot(sumstats,aes(x=Background,y=Mean,group=Sex,colour=Sex))+
 
 2.  Fit a nonadditive 2 way anova model to the data set and provide the residual diagnostics.  Comment on the appropriateness of the current anova fit.
 
+
+```{r non-additive}
+anova.model = aov(Iridium~DepthCat+Strata+DepthCat:Strata, data=ex1317)
+plot(anova.model)
+summary(anova.model)
+
+```
+```{r additive}
+anova.model_add = aov(Iridium~DepthCat+Strata, data=ex1317)
+plot(anova.model_add)
+summary(anova.model_add)
+
+```
+
+# The additive two way anova model provides an adequate fit (R-squared of 0.7676 on 21 df) - despite having a lower R-squared than the non-additive model, the adjusted r-squared values are nearly identical which indicates that the added variables are not significanlty contributing to the predictive power of the more complex model. The simplified model seems to capture the trends shown in the mean plots - Shale is a signficant indicator of Iridium level - as is DepthCat = 3. Both paramaters have p-values below 0.05.
+
+
+
 3.  Provide the type 3 ANOVA F-tests.  Answer the following question using the table.  Do the potential changes in mean Iridium by strata depend on the depth?
 
+# Quite clearly, depth is an important factor, but so is Strata according to the F-tests. The p-value for DepthCat is extremely low - orders of magnitude lower than Strata. The interaction between the two variables is not significant though. Each Strata has a similar relationship w/r/t Iridium and DepthCat
+
+```{r}
+model.anova = aov(Iridium~Strata+DepthCat, data=ex1317)
+Anova(model.anova, type = 3)
+```
+
 4.  Using multple testing techniques, determine what factors (or combinations) contribute to changes in mean iridium.
+
+## Multiple Contrasts
+   
+   # TukeyHSD
+
   
+```{r}
+TukeyHSD(model.anova,"DepthCat",conf.level=.95)
+TukeyHSD(model.anova,"Strata",conf.level=.95)
+
+```
+
+# Bonferroni Contrasts
+
+
+```{r}
+contrast.factor<-~Strata*DepthCat
+mycontrast<-c("Limestone1-Shale1","Limestone2-Shale2","Limestone3-Shale3", "Limestone4-Shale4", "Limestone5-Shale5", "Limestone6-Shale6")
+dat<-ex1317
+
+final.result<-c()
+for( j in 1:length(mycontrast)){
+contrast.factor.names<-gsub(" ", "", unlist(strsplit(as.character(contrast.factor),split = "*", fixed = T))[-1])
+contrast.factor.2 <- vector("list", length(contrast.factor.names))
+for (i in 1:length(contrast.factor.names)) {
+  contrast.factor.2[[i]] <- levels(dat[, contrast.factor.names[i]])
+}
+new.factor.levels <- do.call(paste, c(do.call(expand.grid, 
+                                              contrast.factor.2), sep = ""))
+
+temp.cont<-mycontrast[j]
+contrast2 <- list(comparison = as.vector(do.call(makeContrasts, 
+                                                list(contrasts = temp.cont, levels = new.factor.levels))))
+
+contrast.result <- summary(contrast(lsmeans(model.anova, 
+                                            contrast.factor), contrast2, by = NULL))
+
+final.result<-rbind(final.result,contrast.result)
+}
+#Cleaning up and applying bonferroni correction to the number
+#of total comparisons investigated.
+final.result$contrast<-mycontrast
+final.result$bonf<-length(mycontrast)*final.result$p.value
+final.result$bonf[final.result$bonf>1]<-1
+
+final.result
+
+```
+
+
+The differences in depth are all stastically significant for contrasts with level 3 indicating a strong correlation between a DepthCat = 3 and higher levels of Iridium. 
+
+There is also a difference by strata though not as pronounced. Shale appears to be associated with higher levels of Iridium.
+
+```{r limestone_by_depthcat3}
+contrast.factor<-~Strata*DepthCat
+mycontrast<-c("Limestone1-Limestone3","Limestone2-Limestone3","Limestone4-Limestone3", "Limestone5-Limestone3", "Limestone6-Limestone3")
+dat<-ex1317
+
+final.result<-c()
+for( j in 1:length(mycontrast)){
+contrast.factor.names<-gsub(" ", "", unlist(strsplit(as.character(contrast.factor),split = "*", fixed = T))[-1])
+contrast.factor.2 <- vector("list", length(contrast.factor.names))
+for (i in 1:length(contrast.factor.names)) {
+  contrast.factor.2[[i]] <- levels(dat[, contrast.factor.names[i]])
+}
+new.factor.levels <- do.call(paste, c(do.call(expand.grid, 
+                                              contrast.factor.2), sep = ""))
+
+temp.cont<-mycontrast[j]
+contrast2 <- list(comparison = as.vector(do.call(makeContrasts, 
+                                                list(contrasts = temp.cont, levels = new.factor.levels))))
+
+contrast.result <- summary(contrast(lsmeans(model.anova, 
+                                            contrast.factor), contrast2, by = NULL))
+
+final.result<-rbind(final.result,contrast.result)
+}
+#Cleaning up and applying bonferroni correction to the number
+#of total comparisons investigated.
+final.result$contrast<-mycontrast
+final.result$bonf<-length(mycontrast)*final.result$p.value
+final.result$bonf[final.result$bonf>1]<-1
+
+final.result
+
+```
+
+
+```{r shale_by_depthcat3}
+contrast.factor<-~Strata*DepthCat
+mycontrast<-c("Shale1-Shale3","Shale2-Shale3","Shale4-Shale3", "Shale5-Shale3", "Shale6-Shale3")
+dat<-ex1317
+
+final.result<-c()
+for( j in 1:length(mycontrast)){
+contrast.factor.names<-gsub(" ", "", unlist(strsplit(as.character(contrast.factor),split = "*", fixed = T))[-1])
+contrast.factor.2 <- vector("list", length(contrast.factor.names))
+for (i in 1:length(contrast.factor.names)) {
+  contrast.factor.2[[i]] <- levels(dat[, contrast.factor.names[i]])
+}
+new.factor.levels <- do.call(paste, c(do.call(expand.grid, 
+                                              contrast.factor.2), sep = ""))
+
+temp.cont<-mycontrast[j]
+contrast2 <- list(comparison = as.vector(do.call(makeContrasts, 
+                                                list(contrasts = temp.cont, levels = new.factor.levels))))
+
+contrast.result <- summary(contrast(lsmeans(model.anova, 
+                                            contrast.factor), contrast2, by = NULL))
+
+final.result<-rbind(final.result,contrast.result)
+}
+#Cleaning up and applying bonferroni correction to the number
+#of total comparisons investigated.
+final.result$contrast<-mycontrast
+final.result$bonf<-length(mycontrast)*final.result$p.value
+final.result$bonf[final.result$bonf>1]<-1
+
+final.result
+
+```
+# check against DepthCat2 - just to be sure 
+
+```{r limestone_by_depthcat2}
+contrast.factor<-~Strata*DepthCat
+mycontrast<-c("Limestone1-Limestone2","Limestone3-Limestone2","Limestone4-Limestone2", "Limestone5-Limestone2", "Limestone6-Limestone2")
+dat<-ex1317
+
+final.result<-c()
+for( j in 1:length(mycontrast)){
+contrast.factor.names<-gsub(" ", "", unlist(strsplit(as.character(contrast.factor),split = "*", fixed = T))[-1])
+contrast.factor.2 <- vector("list", length(contrast.factor.names))
+for (i in 1:length(contrast.factor.names)) {
+  contrast.factor.2[[i]] <- levels(dat[, contrast.factor.names[i]])
+}
+new.factor.levels <- do.call(paste, c(do.call(expand.grid, 
+                                              contrast.factor.2), sep = ""))
+
+temp.cont<-mycontrast[j]
+contrast2 <- list(comparison = as.vector(do.call(makeContrasts, 
+                                                list(contrasts = temp.cont, levels = new.factor.levels))))
+
+contrast.result <- summary(contrast(lsmeans(model.anova, 
+                                            contrast.factor), contrast2, by = NULL))
+
+final.result<-rbind(final.result,contrast.result)
+}
+#Cleaning up and applying bonferroni correction to the number
+#of total comparisons investigated.
+final.result$contrast<-mycontrast
+final.result$bonf<-length(mycontrast)*final.result$p.value
+final.result$bonf[final.result$bonf>1]<-1
+
+final.result
+```
+  
+# As expected - only sig diff is  2 vs 3
