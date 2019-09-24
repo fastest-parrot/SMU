@@ -129,7 +129,7 @@ Lets start off by assuming that we did not have access to the temperature data (
 
 ```{r, echo=T}
 #setwd("D:/MSDS6372/HWMark")
-setwd("/Volumes/TRAVELDRIVE/MSDS6372/HWMark")
+#setwd("/Volumes/TRAVELDRIVE/MSDS6372/HWMark")
 library(tseries)
 library(forecast)
 library(ggplot2)
