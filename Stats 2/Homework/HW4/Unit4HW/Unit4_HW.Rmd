@@ -24,11 +24,29 @@ The student may provide there answers in a seperate word document.  Just make su
 
 ## Time Series Conceptual questions
 
-  1.  State the necessary requirements for a time series to be stationary.
-  2.  TRUE or FALSE?  If a time series model includes an explanatory variable such as time itself or some other predictor, then the original time series of the response is not stationary. 
+###  1.  State the necessary requirements for a time series to be stationary.
+    
+    - Constant variance and mean through time, an idealization in practice
+    
+###  2.  TRUE or FALSE?  If a time series model includes an explanatory variable such as time itself or some other predictor, then the original time series of the response is not stationary.
+  
+  - Assuming that any response is a function of time (t) and some other variables [x1, x2,... xi] then the mean and variance of that response would also depend on time and could not be constant throughout time. By definition, if the response function R is a function of time (t) (i.e dR/Dt is non-zero) then the variance of R (<E(R^2)-E<R>^2) is also a function of t, as is the expected value of R itself <E(R)> - any process that behaves in this nanner is non-stationary. This is often the case with time series of financial assests. The mean (expected) price of an asset is largely dependent on time and is subject to processes that influence the variance of that expected price in ways that are clearly a function of time (i.e earnings announcements, corporate filings etc.). 
+  
   3.  What is the major draw back of having serially correlated observations.
+  
+  - Errors in the residuals propogate becuase the observations are not independent of each other> 
+  
   4.  What is the major advantage of having serially correlated observations.
+  
+  - Serial correlation can lead to observations of patterns and underlying trends in the dataset. 
+  - The martingale measure is a very important principle in finance and is a direct consequnece of autocorrelation.
+  - Great example: 
+  
+    https://qr.ae/TWsrmm
+  
   5.  What is the purpose of the durbin watson test?
+  
+  - The purpose of the DW test is to determine whehter autocorrelation is present and if that correlation is positive (values from 0-2) or negative (values from 2-4, 2 being the zero-point for autocorrelation)
 
 
 ## Exercise #1  Simulating time series data to help with ACF and PACF diagnostics.
@@ -53,6 +71,18 @@ pacf(AR1,main="PACF")
 __HOMEWORK QUESTION__
 
 6.  Verify using the rules of thumb table provided in live session, that the simulated data does in fact exhibit the same behaviors in the ACF and PACF plots that an AR(1) model would have.  Verify also that the lag1 autocorrelation value is roughly 0.8 as expected.
+
+   - The rules of thumb in this insatance apply to an ACF that falls off gradually (and clearly has a value of 0.8 at lag value = 1) and a PACF that falls off shortly (in this case at lag value = 1), hence the AR(1) model is most appropriate.
+   
+  - Check autocorrelations:
+  
+```{r auto_correlation_check}
+library(splusTimeSeries)
+AR1 = timeSeries(data = data.frame(AR1))
+AR1_shift = seriesLag(AR1, -1)
+cor(AR1, AR1_shift)
+df = data.frame(AR1, AR1_shift)
+```
 
 7.  Repeat the previous code but only simulate a data set that has 50 observations rather than 10,000.  Generate the 3 plots that were generated before.  Repeat this process 2 more times, each one having only 50 observations.  The point of this exercise is to recognize in smaller data sets, the ACF and PACF plots are not perfect and gives the student some experience on the variation of the plots from data set to set (like examining qqplots for residual assumption checking in regression or anova).
 
