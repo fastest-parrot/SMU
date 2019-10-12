@@ -1,0 +1,17 @@
+) SQL query and data modi?cation commands make up a(n) a) DDL b) DML c) HTML d) XML 
+
+2) To remove duplicate rows from the results of an SQL SELECT statement, which quali?er must be included? a) ONLY b) UNIQUE c) DISTINCT d) SINGLE 
+
+3) In an SQL SELECT statement querying a single table (SELECT *), the asterisk (*) means that: a) all records meeting the full criteria are to be returned. b) all records with even partial criteria met are to be returned. c) all columns of the table are to be returned. d) all columns with the character ‘*’ as a value are to be returned. 
+
+4) In an SQL CREATE TABLE statement, what is the correct way to de?ne the Attributes and their data types? a) (DataType1 Attribute1, DataType2 Attribute2) b) (Attribute1 Attribute2, DataType1 DataType2) c) (Attribute1 Attribute2), (DataType1 DataType2) d) (Attribute1 DataType1, Attribute2 DataType2)
+
+5) The result of a SQL SELECT statement is a(n) a) report b) ?le c) form d) table 
+
+6) You can add a row into a database table using SQL with which of the following? a) ADD b) CREATE c) MAKE d) INSERT 
+
+7) A subquery in an SQL SELECT statement is enclosed in: a) braces – { ... }. b) CAPITAL LETTERS. c) parenthesis – ( ... ). d) brackets – [ ... ]. 
+
+8) Which of the following is the correct order of keywords for SQL SELECT statements? a) SELECT, FROM, WHERE b) FROM, WHERE, SELECT c) WHERE, FROM,SELECT d) SELECT,WHERE,FROM 
+
+9) SQL data de?nition commands make up a(n) a) DDL b) DML c) XML d) HTML
