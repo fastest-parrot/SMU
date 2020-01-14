@@ -1,0 +1,81 @@
+---
+title: "Time Series Unit 1"
+author: "Sean Kennedy"
+date: "1/7/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tswge)
+library(tidyverse)
+library(zoo)
+data(whale)
+
+```
+
+
+```{r}
+plot(whale)
+plotts.wge(whale)
+mean(whale)
+
+```
+
+
+```{r}
+whale_1 = whale[1:143]
+whale_2 = whale[144:286]
+acf(whale_1)
+acf(whale_2)
+#pacf(whale)
+lag_variance = rollapply(whale_1, width=10, FUN=var, fill=NA)
+lag_mean = rollapply(whale_1, width=10, FUN=mean, fill=NA)
+plot(lag_variance)
+plot(lag_mean)
+lag_variance = rollapply(whale_2, width=10, FUN=var, fill=NA)
+lag_mean = rollapply(whale_2, width=10, FUN=mean, fill=NA)
+plot(lag_variance)
+plot(lag_mean)
+```
+
+```{r}
+var(whale[1:143])
+var(whale[144:286])
+```
+
+```{r}
+ten_year_rates = read_csv('10_year_bond_rate_2010-2015.csv')
+plot(ten_year_rates$Close)
+```
+
+```{r}
+acf(ten_year_rates[1:750,]$Close)
+acf(ten_year_rates[751:1509,]$Close)
+lag_variance = rollapply(ten_year_rates$Close, width=100, FUN=var, fill=NA)
+lag_mean = rollapply(ten_year_rates$Close, width=100, FUN=mean, fill=NA)
+plot(lag_variance)
+plot(lag_mean)
+```
+
+```{r}
+
+data("ss08")
+sunspots_1 = ss08[1:30]
+sunspots_2 = ss08[131:260]
+plot(ss08)
+acf(sunspots_1)
+acf(sunspots_2)
+acf(ss08)
+mean(ss08)
+lag_variance = rollapply(ss08, width=25, FUN=var, fill=NA)
+lag_mean = rollapply(ss08, width=25, FUN=mean, fill=NA)
+plot(lag_mean)
+plot(lag_variance)
+ss08[1:3]
+```
+
+```{r}
+plotts.wge(ss08)
+
+```
