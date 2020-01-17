@@ -1,0 +1,15 @@
+---
+title: "Time Series Week 1"
+author: "Sean Kennedy"
+date: "January 6, 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tswge)
+
+data("whale")
+
+
+```

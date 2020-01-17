@@ -1,6 +1,6 @@
 ---
 title: "HW Unit8"
-author: "Jacob Turner"
+author: "Sean Kennened"
 date: ""
 output: word_document
 ---
@@ -9,10 +9,32 @@ output: word_document
 ## MANOVA/LDA Conceptual Questions
 
 1.  State the assumptions of the MANOVA and LDA models.
+
+    - The assumptions for MANOVA are the same as ANOVA:
+      
+      - Random and independent sampling
+      
+      - Individual dependent variable residuals are normally distributed amongst population and within groups
+      
+      - Outliers have been classified and adressed
+    
+    But for MANOVA - one must also verify that the covariances of each population are equal with respect to the response variables
+    
+    For LDA the assumptions are the same but if equal covariance assumption is not met, then other techniques (QDA) must be used.
+    
+      
+
 2.  What is the fundamental difference between MANOVA and LDA since they both share the same underlying assumptions?
+    
+    - MANOVA is a regression-based technique that seeks to find differences amongst groups with respect to multiple response variables. LDA inverts that process and tries to predict which categorical group an observation belongs to, given a particular set of response variables.
+    
 3.  What is a confusion matrix? 
+
+    - A confusion matrix allows you to assess your type 1 and type 2 error rates by displaying the rates of TP/FP/TN/FN
+  
 4.  What is the difference between LDA and QDA, that is, what assumption of the LDA model is relaxed?
 
+    - In LDA discriminate functions are linear with respect to response variables whereas they can be higher order polynomials in QDA
 
 ##Exercise 1:  Visualizing LDA and QDA
 
@@ -21,7 +43,7 @@ As discussed in live session, LDA has some nice geometrical representations that
 Lets consider a simple example with two predictors trying to predict a response with two categories (Yes and No).  However, only one of the predictors, "X2" is really helpful in predicting. The following script simulates a data set and generates a visualization so we can see what we have.  I encourge you to take a quick view of the data set "Full" so you can see the structure of the data set in which LDA will be applied later. 
 
 ```{r,echo=TRUE, fig.height=3.5}
-
+library(glue)
 library(MASS)
 library(mvtnorm)
 set.seed(1234)
@@ -72,19 +94,62 @@ full<-data.frame(full)
 full$Response<-rep(c("Yes","No"),each=30)
 full$Response<-factor(full$Response)
 names(full)[1:2]<-c("X1","X2")
+```
+
+```{r ANSWER_1}
+mylda <- lda(Response ~ X1 + X2, data = full)
+prd <- as.numeric(predict(mylda, newdata = nd)$class)
+
+plot(full[, 1:2], col = full$Response, main="Shift in X2")
+points(mylda$means, pch = "+", cex = 2, col = c("black", "red"))
+contour(x = nd.x, y = nd.y, z = matrix(prd, nrow = np, ncol = np), 
+        levels = c(1, 2), add = TRUE, drawlabels = FALSE)
 
 ```
 
 6.  One of the options of LDA is to incorporate prior information.  Use the ?lda for details on the prior option.  Suppose now that for new data sets coming in that we wish to predict on, we know that 80% of the time they are going to be a "Yes" outcome.  Incoporate the prior information and examine how the prediction boundary of LDA has changed.
 
+```{r ANSWER_2}
+mylda <- lda(Response ~ X1 + X2, data = full, prior = c(0.8, 0.2))
+prd <- as.numeric(predict(mylda, newdata = nd)$class)
+
+plot(full[, 1:2], col = full$Response, main="Shift in X2")
+points(mylda$means, pch = "+", cex = 2, col = c("black", "red"))
+contour(x = nd.x, y = nd.y, z = matrix(prd, nrow = np, ncol = np), 
+        levels = c(1, 2), add = TRUE, drawlabels = FALSE)
+
+```
+
+### Prediction boundary has shifted significantly towards the red area (NO) which means that the classifier is more likely to predict below the boundary (YES) due to the prior probablities being unbalanced.
+
+
 ##Exercise 2:  LDA is not robust against outliers?
+
 7.  Using the data set generated in number 5, add an additional data point  (X1=11,X2=0,Response="Yes").  You can do this simply by doing something like this.
 ```{r, echo=T}
 full[61,1]<-11
 full[61,2]<-0
 full[61,3]<-"Yes"
+
 ```
 Provide the LDA prediction boundary (no priors this time) for this data set with the additional point.  Verify that the observation is an outlier.  Does the prediction boundary change?  
+
+```{r ANSWER_3}
+
+mylda <- lda(Response ~ X1 + X2, data = full)
+prd <- as.numeric(predict(mylda, newdata = nd)$class)
+
+plot(full[, 1:2], col = full$Response, main="Shift in X2")
+points(mylda$means, pch = "+", cex = 2, col = c("black", "red"))
+contour(x = nd.x, y = nd.y, z = matrix(prd, nrow = np, ncol = np), 
+        levels = c(1, 2), add = TRUE, drawlabels = FALSE)
+
+plot(mylda)
+
+```
+
+### Prediction boundary changes dramatically and the observation is clearly an outlier (no other observation comes close to having zero for X2)
+
 
 ##Exercise 3:  LDA and QDA are susceptible to overfitting
 
@@ -129,7 +194,17 @@ names(test)<-paste("X",1:20,sep="")
 
 test$Response<-rep(c("Yes","No"),each=500)
 test$Response<-factor(test$Response)
+```
 
+```{r ANSWER_4_PLOTS}
+
+
+fields = names(train)[1:length(names(train))-1]
+
+for(x in fields){
+  plot(train[,x], col=train$Response,  main=glue('Shift in {x}'))
+
+}
 
 ```
 
@@ -155,8 +230,19 @@ __Homework Questions__
 8.  Refit the LDA model using the first 10 predictors (X1-X10) and then again using all 20 predictors.  For each of the model fits produce the confusion matrix on the test set and the overall accuracy.  Does including unnecessary predictors damages LDA's ability to predict future values?
 
 
-
-
+```{r ANSWER_F}
+mylda<-lda(Response~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,data=train)
+pred<-predict(mylda,newdata=test)$class  #Predictions can come in many forms, the class form provides the categorical level of your response.
+Truth<-test$Response
+x<-table(pred,Truth) # Creating a confusion matrix
+x
+#Missclassification Error
+ME<-(x[2,1]+x[1,2])/1000
+ME
+#Calculating overall accuracy
+1-ME
+```
+### Slghtly worse - but not terribly so
 
 ##Additional Examples to play with.  No more assignments.
 
