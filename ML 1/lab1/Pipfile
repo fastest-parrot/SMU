@@ -9,6 +9,7 @@ verify_ssl = true
 scikit-learn = "*"
 pandas = "*"
 yellowbrick = "*"
+jupyter = "*"
 
 [requires]
 python_version = "3.6"

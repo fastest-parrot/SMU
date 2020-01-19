@@ -1,0 +1,64 @@
+---
+title: "Time Series Unit 3"
+author: "Sean Kennedy"
+date: "1/18/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tswge)
+library(tidyverse)
+```
+
+### HIGH PASS FILTERING
+
+- ISOLATES HIGHER FREQUENCY SIGNALS
+
+- DIFFERENCNG OPERATIONS
+
+
+
+### LOW PASS FILTERING
+
+- ISOLATES LOWER FREQUENCY SIGNALS
+
+- SMOOTHING/MA ETC OPERATIONS
+
+### Question
+
+      Why do we allow MA calcs to be window centered in the examples in the videos? Doesn't this cause information leakage? Is it allowed because we are only looking to build a model that describes the trend and not a predictive model?
+```{r, LOW_PASS_EXAMPLE}
+Realization = gen.sigplusnoise.wge(200,coef = c(5,0),freq = c(.1,0), vara = 10, sn = 1)
+#ma = tswge::
+#filter = 
+#plot(ma)
+```
+
+### GLP (General Linear Process)
+
+  ## AR1
+    
+    This model is a probabilty weighted sum of 3 terms:
+      
+      - Beta: The conribution to the term from the moving(?) average (mu) = (1-phi)*mu
+      
+      - Phi: Coefficient of martingale assumption (i.e weighting on lag(1) term)
+      
+      - a: random noise
+```{r AR1_POSITIVE_PHI}
+
+phi = rep(.6, 50) #AR1 IF AND ONLY IF abs(phi) < 1
+freq = 0.3
+x = seq(0, 25*pi, pi/2)
+X = sin(freq*x) + runif(51, -1, 1)
+plot(X, type = 'line')
+mu = mean(X)
+beta = (1-phi)*mu
+random_noise = rnorm(51)
+glp_ar1_t =  beta + phi*lag(X) + random_noise
+#plot(glp_ar1_t)
+plotts.sample.wge(glp_ar1_t[!is.na(glp_ar1_t)])
+
+
+```
