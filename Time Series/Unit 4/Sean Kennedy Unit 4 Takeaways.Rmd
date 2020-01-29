@@ -1,0 +1,86 @@
+---
+title: "Time Series Unit 4"
+author: "Sean Kennedy"
+date: "1/26/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tswge)
+library(tidyverse)
+library(stats)
+library(lubridate)
+```
+
+```{r EXAMPLE_QUESTION}
+factor.wge(phi = c(1.59, -.544, -.511, .222))
+```
+
+```{r IN_THE_REAL_WORLD}
+## characteristic equation
+## 1+.5Z+.6Z^2 = 0
+## Root is 1.2909 and is outside the unit circle - hence stationary
+## See excel for calculations
+
+factor.wge(phi = c(-0.5, -0.6))
+
+sample = plotts.true.wge(phi = c(-0.5, -0.6))
+```
+
+```{r WALMART}
+walmart_data = read.csv('Walmart.csv')
+item8 = walmart_data %>% filter(item == 50 & store==9)
+sample = plotts.sample.wge(item8$sales)
+```
+### Analysis:
+
+  - Let's check the proposed models for their frequency components
+  
+```{r ANALYSIS}
+phi1 = c(.967)
+factor.wge(phi = phi1)
+sample = plotts.true.wge(phi = phi1)
+## simple wandering model - clearly not sufficient to describe cyclical patterns
+
+phi2 = c(1.452, -.453, -.294, .175, .237, -.154)
+factor.wge(phi = phi2)
+sample2 = plotts.true.wge(phi = phi2)
+# has some wandering but is missing frequencies that are clearly present in sample spectral decomp
+
+phi3 = c(1.445, -.411, -.038, .170, .362, -.245, -.177, .213)
+factor.wge(phi = phi3)
+#sample3 = plotts.true.wge(phi = phi3)
+# AR1 component is non-stationary
+
+phi4 = c(1.384, -.359, -.309, .063, .317, -.140, -.0587, -.199, .2877)
+factor.wge(phi = phi4)
+sample4 = plotts.true.wge(phi = phi4)
+# This one seems to match best to the frequencies observed in the sample, exhibits wandering and has peaks that are close to the observed peaks
+
+```
+
+
+
+### TAKEAWAY 1 BACKSHIFT OPERATOR
+
+- Is basically the lag() function in R
+- (Bk)Xn = X(n-k) lags X by k periods
+
+
+### TAKEAWAY 2 CHARACTERISTIC EQ
+
+- Solves determinate of backshift operator matrix
+- Simple for AR(1) (solve linear eq)
+- Simple for AR(2) (factor or use binomial)
+- For AR(p) use R (factor.wge)
+
+### TAKEAWAY 3 STATIONARITY
+
+- ALL roots of characteristic equation must be outside unit circle for model to be stationary
+- Factor with largest value of abs recip root will dominate periodic behavior
+
+### TAKEAWAY 4 COMPLEX ROOTS
+
+- Complex roots generate sinusoidial behavior with frequencies between 0 and 0.5
+- Required if spectral density has peaks in any other place than 0 or 0.5

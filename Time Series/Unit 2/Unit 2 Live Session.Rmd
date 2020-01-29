@@ -9,12 +9,17 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(tswge)
 library(tidyverse)
-
 ```
 
 ```{r}
 
+x = gen.arma.wge(1000, phi = 0, sn=2)
+parzen.wge(x)
 
+```
 
+```{r}
+data("sunspot.classic")
 
+parzen.wge(sunspot.classic)
 ```
