@@ -1,0 +1,25 @@
+---
+title: "Time Series Week 2 Live Session"
+author: "Sean Kennedy"
+date: "1/14/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tswge)
+library(tidyverse)
+```
+
+```{r}
+
+x = gen.arma.wge(1000, phi = 0, sn=2)
+parzen.wge(x)
+
+```
+
+```{r}
+data("sunspot.classic")
+
+parzen.wge(sunspot.classic)
+```

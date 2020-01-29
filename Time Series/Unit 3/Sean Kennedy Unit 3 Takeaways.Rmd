@@ -9,56 +9,145 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(tswge)
 library(tidyverse)
+library(stats)
+library(lubridate)
 ```
 
-### HIGH PASS FILTERING
+```{r WALMART}
+walmart_data = read.csv('Walmart.csv')
+item8 = walmart_data %>% filter(item == 1 & store==8)
+plotts.sample.wge(item8$sales)
+```
+
+```{r}
+plotts.sample.wge(item8$sales[0:913])
+plotts.sample.wge(item8$sales[914:1826])
+
+```
+
+### Questions:
+
+- Does the data come from a stationary process?
+
+- Does the mean depend on time?
+  
+    - There is a seasonal/cyclical component to the data, but there also appears to be a drift in the mean upward. 
+  
+- Constant variance?
+    
+    - without analyzing another realization, we cannot make any definitive statements on the variance
+  
+- Autocrrelation structure:
+
+  - Autocorrelation structure appear to be constant for the time windows sampled (i.e do not depend on time, only lag)
+
+- Evidence of yearly/weekly seasonality?
+
+  - yearly: yes, it appears that there are spikes in the monthly data spectral density at 0.083 which would correspond to a periodicity of 12 (1/0.083)
+  
+  - weekly: yes, there is a spike in the weekly spectral density around 0.02 which would correspond to a frquency of 52 weeks (1/~0.02)
+  
+
+```{r}
+item8$date = as.Date(item8$date, format='%m/%d/%Y')
+item8_by_month = item8 %>% group_by(month=floor_date(date, 'month')) %>% summarize(monthly_sales=sum(sales))
+
+plotts.sample.wge(item8_by_month$monthly_sales)
+```
+
+
+
+```{r}
+item8_by_week = item8 %>% group_by(month=floor_date(date, 'week')) %>% summarize(weekly_sales=sum(sales))
+
+plotts.sample.wge(item8_by_week$weekly_sales)
+
+```
+
+
+```{r MOVING_AVG_51}
+ma5 = stats::filter(item8$sales, rep(1,5))/5
+plotts.sample.wge(ma5[!is.na(ma5)])
+
+```
+### Comments:
+
+- Lag auto correlations are consistent accross lags due to the smoothing effect of the 5-D moving average filter
+
+```{r MOVING_AVG_5}
+ma51 = stats::filter(item8$sales, rep(1,51))/51
+plotts.sample.wge(ma51[!is.na(ma51)])
+
+```
+
+### Comments:
+
+- Lag auto correlations are even more consistent across lags due to the smoothing effect of the 51-D moving average filter. This is a direct reflection on the information content of the moving average window.
+
+
+
+### TAKEAWAY 1 HIGH PASS FILTERING
 
 - ISOLATES HIGHER FREQUENCY SIGNALS
 
 - DIFFERENCNG OPERATIONS
 
 
-
-### LOW PASS FILTERING
+### TAKEAWAY 2 LOW PASS FILTERING
 
 - ISOLATES LOWER FREQUENCY SIGNALS
 
 - SMOOTHING/MA ETC OPERATIONS
 
-### Question
+### TAKEAWAY 3 (Question?)
 
       Why do we allow MA calcs to be window centered in the examples in the videos? Doesn't this cause information leakage? Is it allowed because we are only looking to build a model that describes the trend and not a predictive model?
+      
+
 ```{r, LOW_PASS_EXAMPLE}
 Realization = gen.sigplusnoise.wge(200,coef = c(5,0),freq = c(.1,0), vara = 10, sn = 1)
-#ma = tswge::
-#filter = 
-#plot(ma)
 ```
 
-### GLP (General Linear Process)
+### TAKEAWY 4 GLP (General Linear Process)
 
-  ## AR1
+### AR1
     
-    This model is a probabilty weighted sum of 3 terms:
+    This model is a probabilty(?) weighted sum of 3 terms:
       
       - Beta: The conribution to the term from the moving(?) average (mu) = (1-phi)*mu
       
       - Phi: Coefficient of martingale assumption (i.e weighting on lag(1) term)
       
       - a: random noise
-```{r AR1_POSITIVE_PHI}
+ 
+## Phi Positive
 
-phi = rep(.6, 50) #AR1 IF AND ONLY IF abs(phi) < 1
-freq = 0.3
-x = seq(0, 25*pi, pi/2)
-X = sin(freq*x) + runif(51, -1, 1)
-plot(X, type = 'line')
-mu = mean(X)
-beta = (1-phi)*mu
-random_noise = rnorm(51)
-glp_ar1_t =  beta + phi*lag(X) + random_noise
-#plot(glp_ar1_t)
-plotts.sample.wge(glp_ar1_t[!is.na(glp_ar1_t)])
+  - Wandering behavior, spike in PSD at 1, decaying ACF (larger the abs of phi, quicker decay)
+  
+## Phi Negative
+
+  - cyclical behavior, spike in PSD at 0.5, sinusodial ACF (larger the abs of phi, quicker decay)
+  
+  
+```{r LIVE_SESSION}
+
+data_set_1 = read.csv('Unit3BOut1Part1.csv')
+plotts.sample.wge(data_set_1$x)
+butter_w = butterworth.wge(data_set_1$x, type='pass', cutoff = c(0.1, 0.4))
+plotts.sample.wge(butter_w$x.filt)
 
 
+```
+
+```{r}
+data_set_2 = read.csv('Unit3BOut1Part2.csv')
+plotts.sample.wge(data_set_2$x)
+butter_w = butterworth.wge(data_set_2$x, type='pass', cutoff = c(0.2, 0.4))
+plotts.sample.wge(butter_w$x.filt)
+```
+
+```{r BREAk_OUT_2}
+
+t = gen.arma.wge(100, phi=-0.99, plot = TRUE, sn = 1)
+plotts.sample.wge(t)
 ```
