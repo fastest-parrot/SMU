@@ -1,0 +1,44 @@
+---
+title: "Week 4 Live Session"
+author: "Sean Kennedy"
+date: "1/28/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tswge)
+library(tidyverse)
+library(stats)
+library(lubridate)
+```
+
+```{r}
+phi3 = c(0.1529, 0.0988, 0.0059, -0.0075, 0.0538, 0.1118, 0.5717, 0.0034, -0.0382 )
+factor.wge(phi = phi3)
+sample3 = plotts.true.wge(phi = phi3)
+
+
+phi1 = c(0.1516, 0.0769, 0.0016, -0.0095, 0.0542, 0.1117, 0.5683)
+factor.wge(phi = phi1)
+sample1 = plotts.true.wge(phi = phi1)
+
+
+#phi2 = c(.4295, .1769, .0358, .1454)
+#factor.wge(phi = phi2)
+#sample2 = plotts.true.wge(phi = phi2)
+```
+
+
+```{r}
+phi = c(.15, -.4)
+factor.wge(phi = phi)
+sample2 = plotts.true.wge(phi = phi)
+
+phi = c(-.15, -.4)
+factor.wge(phi = phi)
+sample2 = plotts.true.wge(phi = phi)
+
+
+
+```
