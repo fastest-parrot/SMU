@@ -33,6 +33,7 @@ walmart_data = read.csv('Walmart.csv')
 item8 = walmart_data %>% filter(item == 50 & store==9)
 sample = plotts.sample.wge(item8$sales)
 ```
+
 ### Analysis:
 
   - Let's check the proposed models for their frequency components
