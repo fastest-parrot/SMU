@@ -1,0 +1,143 @@
+---
+title: "Unit 6 Takeaways"
+author: "Sean Kennedy"
+date: "2/11/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+library(tswge)
+library(tidyverse)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r 6.4.3}
+#true autocorrelation at lag 5
+#(1-.6B+.8B^2)(1-B)^2*X(t)=(1+.3B)*a(t)
+x = gen.arima.wge(500, phi=c(0.6, -0.8), theta=c(-0.3), d=2, sn=37)
+plotts.sample.wge(x)
+ar_factor = factor.wge(phi=c(0.6, -0.8))
+```
+
+```{r 6.4.4-6.4.6}
+#(1-.6B+.8B^2)(1-B)^2*X(t)=(1+.3B)*a(t)
+x = gen.arima.wge(500, phi=c(0.6, -0.8), theta=c(-0.3), d=2, sn=35)
+x_12 = artrans.wge(x, 1)
+parzen.wge(x_12)
+aic5.wge(x_12)
+
+# I think the answer for 6.4.6 is wrong..... should be NO
+```
+
+### Takeaway 1: (1-B)^k Factor
+
+  - Dominates the realization depending on value of k (higher k = more dominant)
+  - should be removed with appropriate differencing (diff = k)
+  - roots lie on the unit cirlce (z = 1)
+  - mix of B^k factors
+
+
+```{r 6.6.2-6.6.3}
+#(1-.6B+.8B^2)(1-B)^2*X(t)=(1-.3B+.7B^2)*a(t)
+x = gen.aruma.wge(500, phi=c(0.6, -0.8), theta=c(0.3, -.7), s=12, sn=37)
+x_diff_12 = artrans.wge(x, c(rep(0, 11), 1))
+parzen.wge(x_diff_12)
+aic5.wge(x_diff_12)
+
+```
+
+### Takeaway 2: Factoring can show the underlying structure of the realization.
+
+  - factoring the AR components can show if there are frequencies that coincide with known frequencies of seasonal    models (quarterly, monthly, weekly etc)
+
+
+### Takeaway 3: (1-B^k) (seasonality) Factor
+
+  - Dominates the realization, should be removed with appropriate differencing (diff = k)
+  - roots lie on the unit cirlce (z = 1)
+  - only contains B^k factor
+
+
+```{r 6.6.6-6.6.7}
+#(1+.5B-.2B^2+B^4-.5B^5+.2B^6)*X(t)=(1+.92B)*a(t)
+factor.wge(phi=c(-.5, .2, 0, 1, .5, -.2))
+#quarterly seasonal model
+
+
+#(1+.3B-1.2B^2-.4b^3-.5B^5+B^12-.3B^13+1.2B^14+.4B^15)*X(t)=a(t)
+factor.wge(phi=c(-.3, 1.2, .4, 0, .5, 0, 0, 0, 0, 0, 0, 1, .3, -1.2, -.4))
+#monthly seasonal model
+```
+
+### Takeaway 4: ARUMA/ARIMA
+
+  - ARUMA is a seasonal model (an ARIMA with d=0 and n=s) defined by (p, s, q)
+  - ARIMA is combination of an AR, MA and S/N model defined by (p, d, q)
+
+### For Live Session - Part 1
+
+```{r LIVE_SESSION_1}
+data('ss08')
+plotts.sample.wge(ss08)
+
+#sunspot data is clearly cyclical from the ACF plot - potentially an AR(2) with complex roots  
+#lets check the AIC
+
+aic5.wge(ss08)
+
+#AIC suggests an ARMA(5, 1) as best fit (could be an AR5 that reduces to AR(2) and AR(1) components)
+
+ss08_10 = artrans.wge(ss08, phi.tr = c(rep(0, 9), 1))
+plotts.sample.wge(ss08_10)
+```
+
+
+### For Live Session Part 2
+
+```{r FOR_LIVE_SESSION_PART_2}
+#factor table for seasonal 7 model
+factor.wge(phi=c(rep(0,6), 1))
+
+```
+```{r FOR_LIVE_SESSION_PART_3}
+#model a
+#(1-B4) Xt = (1+.3B) (1-.6B+.8B2)at
+# Seasonal with d=0 (p=0, q=3)
+phi_a = c(rep(0, 3), 1)
+theta_a = c(.3, -.62, -.24)
+a = gen.aruma.wge(500, s=4, theta=theta_a, sn=37)
+a_4 = artrans.wge(a, phi=phi_a)
+aic5.wge(a_4)
+plotts.sample.wge(a_4)
+#model b
+#(1+.3B) Xt = (1-.6B+.8B2) at
+# ARMA with p=1, q=2
+phi_b = c(-.3)
+theta_b = c(.6, -.8)
+b = gen.arma.wge(500,theta=theta_b, phi=phi_b,  sn=37)
+aic5.wge(b)
+plotts.sample.wge(b)
+#model b
+#(1-.1B-.99B2 +.013B3 +.2078B4 +.0888B5 +.00864B6)(1-B)2(1-B12) Xt = (1-.6B+.8B2)at
+# ARUMA d=1, s=12 p=6, q=2
+phi_c = c(.1, .99, -.013, -.2078, -0.888, -.00864)
+factor.wge(phi = phi_c)
+theta_c = c(.6, -.8)
+#c = gen.aruma.wge(500,theta=theta_c, phi=phi_c, s=12, d=1,  sn=37)
+#aic5.wge(c)
+## Can't get this one to work :(
+
+```
+
+```{r STOCK_DATA}
+pzza = read.csv('pzza.csv', header=FALSE)
+pzza_1 = artrans.wge(pzza$V1, phi.tr = c(1))
+#diffed data has all the characteristics of white noise - autocorrelations > k=0 are zero
+#an appropriate model could be signal-noise model with sigma_noise = realized variance of stock and a wandering 
+#component of d = 1
+
+aic5.wge(pzza_1)
+
+#AIC confirms white noise and also suggests an AR(2) or an MA(2) model as best fit
+
+```
