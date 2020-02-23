@@ -12,6 +12,7 @@ yellowbrick = "*"
 pandas = "*"
 numpy = "*"
 seaborn = "*"
+graphviz = "*"
 
 [requires]
 python_version = "3.7"
