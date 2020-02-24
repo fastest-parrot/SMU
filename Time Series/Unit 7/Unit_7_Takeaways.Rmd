@@ -1,0 +1,52 @@
+---
+title: "Unit 7 Takeaways"
+author: "Sean Kennedy"
+date: "2/23/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tswge)
+```
+
+```{r 7.6.7}
+
+phi= c(0.4, -0.6, 0.8)
+mu = 9
+var = 3.49
+psi = psi.weights.wge(phi=phi, lag.max=3)
+sigma = sqrt(var)
+
+interval_half = sigma*(sum(c(1,psi[1:length(psi)-1]**2)))**0.5
+
+```
+
+```{r 7.7.3}
+
+delays = read.csv('SWADelay.csv')
+delays = delays$arr_delay
+ar12_phi = c(0.44, 0.02, -0.12, 0.08, 0.0, 0.02, 0.06, -0.09, 0.06, 0.07, 0.02, 0.37)
+
+
+arima_12_phi = c(0.34, 0.07, -0.11, 0.07, 0.01, 0.02, 0.06, -0.09, 0.05, 0.07, 0.02, 0.39)
+arima_12_theta = c(-.12)
+
+ar12_forecasts = fore.arma.wge(delays, phi=ar12_phi, lastn = T, n.ahead = 30)
+arima_12_forecasts = fore.arma.wge(delays, phi=arima_12_phi, theta = arima_12_theta, lastn = T, n.ahead = 30)
+
+actual = delays[(length(delays)-29):length(delays)]
+err_ar12 = mean((ar12_forecasts$f-actual)**2)
+err_arima_12 = mean((arima_12_forecasts$f-actual)**2)
+
+mean(delays)
+```
+
+
+```{r}
+
+actual
+```
+
+
+
