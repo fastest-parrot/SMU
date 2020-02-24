@@ -2,7 +2,9 @@
 title: "Unit 7 Takeaways"
 author: "Sean Kennedy"
 date: "2/23/2020"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -25,7 +27,7 @@ interval_half = sigma*(sum(c(1,psi[1:length(psi)-1]**2)))**0.5
 ```{r 7.7.3}
 
 delays = read.csv('SWADelay.csv')
-delays = delays$arr_delay
+delays = log(delays$arr_delay)
 ar12_phi = c(0.44, 0.02, -0.12, 0.08, 0.0, 0.02, 0.06, -0.09, 0.06, 0.07, 0.02, 0.37)
 
 
@@ -42,11 +44,81 @@ err_arima_12 = mean((arima_12_forecasts$f-actual)**2)
 mean(delays)
 ```
 
+```{r 7.9.6}
+woodward_phi = c(-.36, -.05, -.14, .04, .09, -.02, .02, .17, .03, -.1, -.38)
+woodward_forecasts = fore.aruma.wge(delays, phi=woodward_phi, d=1, s=12, lastn = T, n.ahead = 36)
+actual = delays[(length(delays)-35):length(delays)]
+err_woodward = mean((woodward_forecasts$f-actual)**2)
+```
 
-```{r}
 
-actual
+```{r 7.10.2}
+amazon = read.csv('AMZN.csv')
+amazon = amazon$Adj.Close
+forecasts = fore.sigplusnoise.wge(amazon, linear = TRUE, freq=0, max.p=5, n.ahead = 30, lastn=FALSE, limits=TRUE)
+max(forecasts$f)
+forecasts$ul[30]
+forecasts$ll[30]
 ```
 
 
 
+```{r FOR_LIVE_SESSION_1}
+data('ss08')
+aic5.wge(ss08, p=0:10, q=0:10, type='aic')
+
+
+plotts.parzen.wge(ss08)
+plotts.sample.wge(ss08)
+
+```
+
+```{r FOR_LIVE_SESSION_2}
+x = c(5, 8, 9, 8, 7, 6, 4, 3)
+phi = c(1.7, -.72)
+sigma = sqrt(sd(x))
+mu = mean(x)
+
+psi = psi.weights.wge(phi=phi, lag.max = 3)
+interval_half = sigma*(sum(c(1,psi[1:length(psi)-1]**2)))**0.5
+
+forecast = fore.arma.wge(x, phi=phi, n.ahead=8, lastn=FALSE, plot=TRUE, limits=TRUE)
+
+interval_half
+forecast$f[3]
+forecast$ul[3]
+forecast$ll[3]
+```
+
+```{r}
+psi[1:length(psi)-1]
+    
+```
+
+```{r FOR_LIVE_SESSION_3}
+amtrack = read.csv('AmtrakPassengersMonthly.csv')$Ridership
+
+phi1 = c(0.5511, 0.1680, -0.0145, 0.0651, 0.1388, -0.2966, 0.1539, 0.1270, -0.1815, 0.0364, 0.1456, 0.6287, -0.3832, -0.0199, -0.1679) 
+
+phi2 =  c(-0.02709541,  0.74213105)
+theta2 = c(-0.5844596,  0.3836931)
+
+phi3 = c(0.306943)
+theta3 = c(0.7431719)
+
+forecast1 = fore.arma.wge(amtrack, phi=phi1, lastn=TRUE, n.ahead=12, limits=TRUE, plot=TRUE)$f
+
+forecast2 = fore.arma.wge(amtrack, phi=phi2, theta=theta2, lastn=TRUE, n.ahead=12, limits=TRUE, plot=TRUE)$f
+
+
+forecast3 = fore.arma.wge(amtrack, phi=phi3, theta=theta3, lastn=TRUE, n.ahead=12, limits=TRUE, plot=TRUE)$f
+
+actual = amtrack[(length(amtrack)-11):length(amtrack)]
+err_1 = mean((forecast1-actual)**2)
+err_2 = mean((forecast2-actual)**2)
+err_3 = mean((forecast3-actual)**2)
+
+
+```
+
+### model 1 has smallest ASE (i.e is best fit)
