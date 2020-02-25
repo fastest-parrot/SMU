@@ -1,0 +1,18 @@
+---
+title: "Unit 6 Takeaways"
+author: "Sean Kennedy"
+date: "2/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tswge)
+library(tidyverse)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+factor.wge(c(0.6996, 0.2599, 0.0079, -0.0646, 0.1381, -0.0953, 0.0235, -0.0969, 0.1770, -0.1191, 0.1030, 0.7754, -0.4590, -0.4099, 0.0501))
+factor.wge(c(rep(0, 11), 1))
+```
+

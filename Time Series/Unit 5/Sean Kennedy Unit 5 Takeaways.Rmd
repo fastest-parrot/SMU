@@ -1,0 +1,134 @@
+---
+title: "Time Series Unit "
+author: "Sean Kennedy"
+date: "1/26/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tswge)
+library(tidyverse)
+library(stats)
+library(lubridate)
+data('sunspot.classic')
+
+```
+
+```{r EXAMPLE_QUESTION}
+factor.wge(phi = c(1.59, -.544, -.511, .222))
+```
+
+```{r 5.5.5}
+## characteristic equation
+## 1+0.1Z+0.82Z^2-.16Z^3=1+.2z
+
+factor.wge(phi=c(-.1, -.8))
+factor.wge(phi=c(-.2))
+
+
+
+```
+
+```{r 5.5.6}
+## characteristic equation
+## 1-1.95Z+1.9Z^2 = 1-1.95z+1.9z^2
+
+factor.wge(phi=c(1.95, -1.9))
+factor.wge(phi=c(1.95, -1.9))
+
+```
+
+```{r 5.5.10}
+## characteristic equation
+## 1-.1Z+.5Z^2-.7z^3 = 1-.72z+.8z^2
+
+plotts.true.wge(phi = c(.1,-.5, .7), theta = c(.72, -.8))
+
+
+```
+
+```{r 5.7.3}
+## characteristic equation
+## 1-1.95Z+1.9Z^2 = 0
+psi.weights.wge(c(1.95, -1.9), lag.max = 4)
+
+```
+
+```{r FOR_LIVE_SESSION}
+#run AIC5 on sunspot data
+plotts.sample.wge(sunspot.classic)
+aic5.wge(sunspot.classic)
+
+```
+
+```{r WALMART}
+walmart_data = read.csv('Walmart.csv')
+item8 = walmart_data %>% filter(item == 50 & store==9)
+sample = plotts.sample.wge(item8$sales)
+aic5.wge(item8$sales)
+#best model is an ARMA(4, 2), ARMA(5, 1) is a close second
+#all have components of AR/MA models
+
+
+```
+
+```{r CALC_RHO_1}
+## characteristic equation
+## 1-0.8Z+0.5Z^2 = 0
+theta_1 = 0.5
+theta_2 = 0
+rho1 =  (-theta_1 + theta_1*theta_2)/(1+theta_1^2+theta_2^2)
+rho1
+rho2 =  (-theta_2)/(1+theta_1^2+theta_2^2)
+rho2
+#psi.weights.wge(theta = c(theta_1, theta_2), lag.max=3)
+
+#GLM: Xt = at - theta_1*a_t_minus_1 - theta_2*a_t_minus_2
+plotts.true.wge(theta=c(theta_1, theta_2))
+```
+
+```{r GERNATE_AN_ARMA}
+sample = plotts.true.wge(phi=c(0.2, -.1), theta=c(theta_1, theta_2))
+#p = 2
+#q = 2
+#ARMA(2,2)
+
+```
+```{r}
+flights = read.csv('SWADelay.csv')
+aic5.wge(flights$arr_cancelled)
+
+#models 1 and 3 are pure AR models (AR(1) and AR(2))
+#models 2 and 5 are pure MA models (MA(2) and MA(1))
+#model 4 is an ARMA(1, 1)
+
+```
+
+
+
+
+### TAKEAWAY 1 MA(q)
+
+- All auto_correlations for k > q = 0
+- Inverse spectral density peaks
+- ALL MA MODELS ARE STATIONARY (make useful components but very rarely useful on their own)
+
+### TAKEAWAY 2 MODEL EQUIVALENCY
+
+- ARMA(0, q) = MA(q)
+- ARMA(p, 0) = AR(p)
+
+### TAKEAWAY 3 MA INVERTABILITY
+
+- Must be invertable (roots must me outside unit circle)
+- 2 models with the same autocorrelation structure (model multiplicity): one will be invertable, one will not be
+(how does multiplicity relate to entropy?)
+
+
+### TAKEAWAY 4 AR MODELS AS INFINITE SUM 
+
+- All AR models can be represented as GLP (General Linear Process)
+
+- Any AR model can be represented as an infinite sum of random noise terms much like the components of a wavefunction in QM
+- 
