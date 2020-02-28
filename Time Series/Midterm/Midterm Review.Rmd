@@ -1,0 +1,22 @@
+---
+title: "Untitled"
+author: "Sean Kennedy"
+date: "2/25/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tswge)
+
+```
+
+
+```{r auto_correlations}
+x = c(6,8,13,12,10,7,4,2)
+var(x)*7/8
+
+rho_0 = 1
+
+
+```
