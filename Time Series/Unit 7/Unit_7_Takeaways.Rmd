@@ -1,7 +1,7 @@
 ---
 title: "Unit 7 Takeaways"
 author: "Sean Kennedy"
-date: "2/23/2020"
+date: "2/16/2020"
 output:
   html_document: default
   pdf_document: default
@@ -75,20 +75,12 @@ plotts.sample.wge(ss08)
 ```
 
 ```{r FOR_LIVE_SESSION_2}
-x = c(5, 8, 9, 8, 7, 6, 4, 3)
-phi = c(1.7, -.72)
-sigma = sqrt(sd(x))
-mu = mean(x)
+phi = c(.7)
+sigma = 3.73
+mu = 15.6
 
-psi = psi.weights.wge(phi=phi, lag.max = 3)
+psi = psi.weights.wge(phi=phi, lag.max = 2)
 interval_half = sigma*(sum(c(1,psi[1:length(psi)-1]**2)))**0.5
-
-forecast = fore.arma.wge(x, phi=phi, n.ahead=8, lastn=FALSE, plot=TRUE, limits=TRUE)
-
-interval_half
-forecast$f[3]
-forecast$ul[3]
-forecast$ll[3]
 ```
 
 ```{r}
@@ -123,3 +115,28 @@ err_3 = mean((forecast3-actual)**2)
 ```
 
 ### model 1 has smallest ASE (i.e is best fit)
+
+
+
+### TAKEAWAY 1
+
+- ARIMA Forecasting
+  
+  Use fore.aruma.wge() for forecasting.
+  Limits become unbounded as l increases
+  A factor of (1 − B) does not forecast a trend. An order of
+  d > 1 is required to forecast a trend.
+  
+### TAKEAWAY 2
+
+ARIMA with Seasonality Forecasting
+The forecast for step l is same as the last s value. Use
+fore.aruma.wge() for forecasting.
+Limits become unbounded as l increases
+
+### TAKEAWAY 3
+
+ A factor of (1 − B) does not forecast a trend. An order of
+d > 1 is required to forecast a trend.
+ (1 − B) (1 − Bs
+) = at is called an airline model

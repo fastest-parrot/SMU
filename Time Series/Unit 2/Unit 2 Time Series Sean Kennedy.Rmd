@@ -21,3 +21,15 @@ plot(f2, type = 'line')
 plot(f3, type = 'line')
 
 ```
+
+
+```{r}
+gen.sigplusnoise.wge(100,b0 = 0, b1 = .5, phi = .95, vara = 8)
+
+```
+
+```{r}
+x= gen.arma.wge(500, phi=(-.997))
+plotts.sample.wge(x)
+```
+

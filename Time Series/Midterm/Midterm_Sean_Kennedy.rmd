@@ -1,0 +1,106 @@
+---
+title: "Midterm Time Series"
+author: "Sean Kennedy"
+date: "2/25/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tswge)
+random = 6
+```
+
+### Stationarity 
+
+- Subpopulations of X for a given time have constant mean for all t.
+			 𝐸[𝑋_𝑡 ]=𝜇
+- Subpopulations of X for a given time have a constant variance for all t. 
+			 Var[𝑋_𝑡]= 𝜎^2 
+- The correlation of 𝑋_(𝑡_1 )and 𝑋_(𝑡_2 ) depends only on 𝑡_2− 𝑡_1. That is, the covariance between data points is  dependent only on how far apart they are, not where they are (in the series). 
+
+
+
+### Nyquist Frequency
+
+- The frequency of aliasing (or mapping) for a signal that repeats. Consider two cosine curves with different frequencies, at points where the arguments of the cosine are equal, the realizations generated will overlap (alias). For this to be true - the two frequencies must be separated by a "beat". The minimum separation to achieve this folding/aliasing is the nyquist frequency. 
+
+```{r AR1}
+ar1 = gen.arma.wge(500, phi=c(.8), sn = random, plot = FALSE)
+plotts.sample.wge(ar1)
+
+ar1 = gen.arma.wge(500, phi=c(-.8), sn = random, plot = FALSE)
+plotts.sample.wge(ar1)
+
+```
+
+```{r AR2}
+#complex
+ar2 = gen.arma.wge(500, phi=c(.8, -0.8), sn = random, plot = FALSE)
+plotts.sample.wge(ar2)
+
+#real pos/neg
+ar2 = gen.arma.wge(500, phi=c(.2, .48), sn = random, plot = FALSE)
+plotts.sample.wge(ar2)
+
+#real pos/neg
+ar2 = gen.arma.wge(500, phi=c(-.2, -.48), sn = random, plot = FALSE)
+plotts.sample.wge(ar2)
+
+factor.wge(phi=c(.8, -0.8))
+factor.wge(phi=c(.2, .48))
+factor.wge(phi=c(-.2, -.48))
+
+
+phi = c()
+ar2 = gen.arma.wge(500, phi=phi, sn = random, plot = FALSE)
+plotts.sample.wge(ar2)
+factor.wge(phi=phi)
+
+```
+
+```{r AR(p)}
+
+phi = c(-.1, -.1, 0.3)
+arp = gen.aruma.wge(500, phi=phi, sn=random)
+plotts.sample.wge(arp)
+factor.wge(arp)
+
+
+```
+
+```{r MA(q)}
+
+theta = c(-.2, -.1, .99)
+maq = gen.aruma.wge(500, theta=theta, sn=random)
+plotts.sample.wge(maq)
+factor.wge(maq)
+
+
+```
+
+```{r}
+
+x=c(10, 15, 20, 19, 14)
+
+g = var(x)*((length(x)-1)/length(x))
+g4 = (x[1]-mean(x))*(x[5]-mean(x))/length(x)
+
+rho_4 = g4/g
+
+
+plotts.sample.wge(x)
+
+```
+```{r}
+residuals = c(0, -4.52, 3.98, 6.48, 0.78)
+sd(residuals)*(length(residuals)-1)/(length(residuals))
+```
+
+
+```{r}
+
+s4 = gen.aruma.wge(200, phi = 0.5)
+plotts.sample.wge(s4)
+```
+
