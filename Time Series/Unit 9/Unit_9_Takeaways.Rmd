@@ -1,0 +1,62 @@
+---
+title: "Unit 9 Takeaways"
+author: "Sean Kennedy"
+date: "2/29/2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tswge)
+```
+
+```{r 9.3.3}
+
+phi= c(0.3, -0.7)
+theta = c(-.4)
+mu = 37
+sigma_a = 4
+
+realization = gen.arma.wge(200, phi=phi, theta=theta, vara=sigma_a, sn=27)
+realization = realization + mu
+est.arma.wge(realization, p=2, q=1)
+mean(realization)
+```
+
+```{r 9.5.7}
+
+phi= c(0.3, -0.7)
+mu = 37
+sigma_a = 4
+
+realization = gen.arma.wge(200, phi=phi, vara=sigma_a, sn=27)
+realization = realization + mu
+est.ar.wge(realization, p=2, type='burg')
+
+```
+
+```{r 9.8.3}
+wn = read.csv('maybewhitenoise1.csv')
+plotts.sample.wge(wn$x)
+
+```
+
+```{r 9.8.4}
+wn = read.csv('maybewhitenoise2.csv')
+plotts.sample.wge(wn$x)
+
+```
+
+```{r 9.9.4}
+#CANNOT BE ANSWERED - NO N
+```
+
+```{r 9.9.5}
+inflation = read.csv('inflation.csv')
+plotts.sample.wge(inflation$Inflation)
+aic5.wge(inflation$Inflation, type='aic')
+aic5.wge(inflation$Inflation, type='bic')
+```
+
