@@ -4,7 +4,6 @@ author: "Sean Kennedy"
 date: "2/29/2020"
 output:
   html_document: default
-  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -60,3 +59,122 @@ aic5.wge(inflation$Inflation, type='aic')
 aic5.wge(inflation$Inflation, type='bic')
 ```
 
+
+```{r 9.12.2}
+data = read.csv('armawhatpq1.csv')
+
+acf(data$x)
+pacf(data$x)
+```
+
+```{r 9.12.4}
+data = read.csv('armawhatpq1.csv')
+aic5.wge(data$x, type='aic')
+aic5.wge(data$x, type='bic')
+```
+
+```{r 9.12.3}
+data = read.csv('inflation.csv')
+acf(data$Inflation)
+pacf(data$Inflation)
+```
+
+```{r FOR_LIVE_SESSION}
+texas = read.csv('texasgasprice.csv')
+
+aic5.wge(texas$Price)
+
+ar2_est_mle = est.ar.wge(texas$Price, p=2, type = 'mle')
+ar2_est_burg = est.ar.wge(texas$Price, p=2, type = 'burg')
+
+phi_burg = ar2_est_burg$phi
+phi_mle = ar2_est_mle$phi
+
+predict_burg = fore.arma.wge(texas$Price, phi = phi_burg, n.ahead = 24, lastn = TRUE)
+predict_mle= fore.arma.wge(texas$Price, phi = phi_mle, n.ahead = 24, lastn = TRUE)
+
+plotts.sample.wge(texas$Price)
+
+plotts.true.wge(500, phi = phi_burg, vara=ar2_est_burg$avar)
+plotts.true.wge(500, phi = phi_mle, vara=ar2_est_mle$avar)
+## results from burg and MLE are identical?
+```
+
+```{r}
+phi_burg
+
+
+```
+
+```{r}
+phi_mle
+
+```
+```{r}
+bo2 = read.csv('Unit9_2.csv')
+pacf(bo2$x)
+acf(bo2$x)
+ar1 = est.ar.wge(bo2$x, p=1)
+ar2 = est.ar.wge(bo2$x, p=2)
+ar3 = est.ar.wge(bo2$x, p=3)
+ar4 = est.ar.wge(bo2$x, p=4)
+ar5 = est.ar.wge(bo2$x, p=5)
+ar6 = est.ar.wge(bo2$x, p=6)
+aic5.wge(bo2$x, type = 'bic')
+plotts.sample.wge(bo2$x)
+test = plotts.true.wge(500, ar6$phi)
+acf(test$data)
+plot(test$aut1)
+```
+
+### Takewawy 1
+
+  - ALWAYS CHECK FOR WHITE NOISE
+  
+    - Evidence of constant/mean variance? 
+    
+### Takeaway 2
+
+  - Yule Walker estitmates are not very useful when roots are close to unit circle (i.e realization exhibits wandering)
+  
+  - Burg estimates will not produce roots inside unit circle (which is good!)
+  
+  - MLE estimates are better than YW but can produce roots inside unit cirlcle
+  
+### Takeaway 3
+
+  - AIC is a more useful metric than RMSE because it penalizes for model complexity
+  
+## Takeaway 4
+
+  - Interpreting ACF/PACF plots for MA/AR models:
+  
+    - MA models
+        
+        -ACF: drop off after k=q
+        
+        -PACF 
+        
+    -AR models
+    
+      - ACF: depends on nature of roots
+      
+      
+      - PACF
+      
+```{r}
+  bo2 = read.csv('Unit9_1.csv')
+  pacf(bo2$x)
+  acf(bo2$x)
+  ar1 = est.ar.wge(bo2$x, p=1)
+  ar2 = est.ar.wge(bo2$x, p=2)
+  ar3 = est.ar.wge(bo2$x, p=3)
+  ar4 = est.ar.wge(bo2$x, p=4)
+  ar5 = est.ar.wge(bo2$x, p=5)
+  ar6 = est.ar.wge(bo2$x, p=6)
+  aic5.wge(bo2$x, type = 'aic')
+  plotts.sample.wge(bo2$x)
+  test = plotts.true.wge(500, ar6$phi)
+  acf(test$data)
+  plot(test$aut1)
+```
