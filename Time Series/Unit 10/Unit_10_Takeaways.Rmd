@@ -1,0 +1,76 @@
+---
+title: "Unit 10 Takeaways"
+author: "Sean Kennedy"
+date: "2/29/2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tswge)
+
+```
+
+```{r 10.3.3}
+
+bonds = read.csv('10_year_bond_rate_2010-2015.csv')
+p = plotts.sample.wge(bonds$Adj.Close)
+```
+```{r 10.3.4}
+
+bonds_t = artrans.wge(bonds$Adj.Close, phi.tr = c(1))
+p = plotts.sample.wge(bonds_t)
+
+```
+
+```{r 10.3.5}
+
+
+aic5.wge(bonds_t)
+
+```
+
+```{r 10.3.6}
+
+
+aic5.wge(bonds$Adj.Close)
+
+```
+
+```{r 9.5.7}
+
+phi= c(0.3, -0.7)
+mu = 37
+sigma_a = 4
+
+realization = gen.arma.wge(200, phi=phi, vara=sigma_a, sn=27)
+realization = realization + mu
+est.ar.wge(realization, p=2, type='burg')
+
+```
+
+```{r 9.8.3}
+wn = read.csv('maybewhitenoise1.csv')
+plotts.sample.wge(wn$x)
+
+```
+
+```{r 9.8.4}
+wn = read.csv('maybewhitenoise2.csv')
+plotts.sample.wge(wn$x)
+
+```
+
+```{r 9.9.4}
+#CANNOT BE ANSWERED - NO N
+```
+
+```{r 9.9.5}
+inflation = read.csv('inflation.csv')
+plotts.sample.wge(inflation$Inflation)
+aic5.wge(inflation$Inflation, type='aic')
+aic5.wge(inflation$Inflation, type='bic')
+```
+
