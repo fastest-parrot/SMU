@@ -1,0 +1,220 @@
+---
+title: "Tme Series Midterm"
+author: "Sean Kennedy"
+date: "2/29/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tswge)
+library(tidyverse)
+library(zoo)
+data = read.csv('midterm.csv')
+data$LagVariance = rollapply(data$x, width=10, FUN=var, fill=NA)
+data$LagMean = rollapply(data$x, width=10, FUN=mean, fill=NA)
+```
+
+```{r PLOTTS}
+plotts.sample.wge(data$x)
+```
+
+### Question 1:
+
+    Do you think the data come from a stationary process? Defend your thoughts using the 3 conditions of stationarity.  Provide acf plots for condition 3. 
+    
+## Condition 1: Does the mean depend on time?
+
+Since we only have one realization to analyze - we can only make an educated guess as to whether or not the series meets this criterion. In this case, we see strong evidence of cyclic behavior which would inddicate the mean of the generating function does depend on time and - according to the realiztion is much lower with a periodicity of 1 cycle for approximately every 12 periods. There is also slight evidence of wandering beginning around obersvation 60 which could indicate a general increase in the mean.
+  
+```{r CONDITION_1}
+ggplot() + 
+  geom_line(aes(data$X, data$x)) + 
+   geom_line(aes(data$X, rep(mean(data$x), length(data$X))), colour='red') + 
+    geom_line(aes(data$X, data$LagMean), colour='blue') 
+```
+
+
+
+## Condition 2: Constant Variance?
+
+Since we are making a case against stationarity with condition 1 - it's difficult to assess whether or not the assumption of constant variance is met. Certainly appears to be sketchy given the charts below, but the only true way to assess this assumption would be to have multiple realizations - which are not available.
+    
+```{r CONDITION_2}
+
+ggplot() + 
+  geom_line(aes(data$X, data$LagVariance)) + 
+    geom_line(aes(data$X, rep(var(data$x), length(data$X))), colour='red')
+
+```
+
+## Condition 3: Correlation Structure
+
+   ACF plots on paritions of the data indicate a constant auto correlation structure - which means that the autocorrelations only depend on the lag and not on their specific place in time. Hence this condition is met.
+
+```{r}
+acf(data$x[1:72], lag.max = 25)
+acf(data$x[73:144], lag.max = 25)
+```
+
+### Question 2:
+
+The Models:  Consider these two models of the data in the realization in Midterm2020.csv:
+
+Model 1:	 (1-B12)( 1 - 0.5380B -  0.0606B2 -  0.1923B3)Xt = at
+
+Model 2:	 (1 - 1.0507B + 0.0756B2)Xt = (1 - 0.5927B - 0.2751B2)at
+
+Write model 1 as a GLP up to 4 terms
+
+```{r MODEL_1_GLP}
+#expanding model 1 to get phi
+phi = c(0.538, 0.0606, 0.1923, 0, 0, 0, 0, 0, 0, 0, 0, 1, -0.538, -0.0606, -0.1923)
+psi.weights.wge(phi=phi, lag.max = 5)
+
+#model 1 as GLP
+#Xt = at + 0.538a(t-1) + 0.35044a(t-2) + 0.4132265a(t-3)
+
+```
+
+### Question 3
+
+Is model 2 invertable?
+
+```{r MODEL_2_INVERTABLE}
+#ar portion
+phi_2 = c(1.0507, -0.0756)
+factor.wge(phi=phi_2)
+
+#all roots of AR portion are outside the unit circle, hence stationary/invertable
+
+#ma portion
+theta_2 = c(0.5927, 0.2751)
+factor.wge(theta_2)
+
+#all roots of MA portion are outside the unit circle, hence stationary/invertable
+
+```
+
+### Question 4: Spectral Densities/ACFs for each model:
+
+```{r MODEL_1_ACF_SD}
+phi_1 = c(0.0538, 0.0606, 0.1923)
+model1 = gen.aruma.wge(500, phi=phi_1, s=12, sn=6)
+plotts.sample.wge(model1)
+
+```
+
+```{r MODEL_2_ACF_SD}
+model2 = gen.aruma.wge(500, phi=phi_2, theta = theta_2, sn=6)
+plotts.sample.wge(model2)
+
+```
+
+### Question 5: Factor Tables for Each Model
+
+```{r MODEL_1_FACTOR_TABLE}
+factor.wge(phi=phi)
+```
+
+```{r MODEL_2_FACTOR_TABLE}
+factor.wge(phi_2)
+factor.wge(theta_2)
+```
+
+### Question 6: ASE for each model (last 12 months)
+
+```{r MODEL_1_ASE_12}
+model_1_forecast = fore.aruma.wge(data$x, phi=phi_1, s=12, n.ahead=12, lastn = FALSE)
+actual = data$x[(length(data$x)-11):length(data$x)]
+ase = mean((model_1_forecast$f-actual)**2)
+ase
+
+```
+
+```{r MODEL_2_ASE}
+model_2_forecast = fore.aruma.wge(data$x, phi=phi_2, theta = theta_2, n.ahead=12, lastn = FALSE)
+actual = data$x[(length(data$x)-11):length(data$x)]
+ase = mean((model_2_forecast$f-actual)**2)
+ase
+
+```
+
+### Question 7: calculate the rolling average ASE for each model
+
+
+```{r MODEL_1_ROLLING_ASE}
+ase_rolling = c()
+model_1_rolling_predictions = c()
+window_size = 12
+for(window in seq(1:10)){
+  start = length(data$x)-window_size*window + 1
+  end = length(data$x)+(1-window)*window_size
+  model_forecast = fore.aruma.wge(data$x[0:end], phi=phi_1, s=12, n.ahead=window_size, lastn = FALSE, plot = FALSE)
+  actual = data$x[start:end]
+  ase = mean((model_forecast$f-actual)**2)
+  ase_rolling = cbind(ase_rolling, ase)
+  model_1_rolling_predictions = c(model_forecast$f, model_1_rolling_predictions)
+  #print(ase)
+}
+mean(ase_rolling)
+
+```
+```{r MODEL_2_ROLLING_ASE}
+ase_rolling = c()
+window_size = 12
+model_2_rolling_predictions = c()
+for(window in seq(1:10)){
+  start = length(data$x)-window_size*window + 1
+  end = length(data$x)+(1-window)*window_size
+  model_forecast = fore.aruma.wge(data$x[0:end], phi=phi_2, theta=theta_2, n.ahead=window_size, lastn = FALSE, plot = FALSE)
+  actual = data$x[start:end]
+  ase = mean((model_forecast$f-actual)**2)
+  ase_rolling = cbind(ase_rolling, ase)
+  model_2_rolling_predictions = c(model_forecast$f, model_2_rolling_predictions)
+  
+  #print(ase)
+}
+mean(ase_rolling)
+```
+
+### Question 8: 
+
+Compare the single ASE to the rolling window ASE.  Are they rougly the same, is one significantly larger?  Does it provide evidence as to which model is more useful? 
+
+For model 1 the single window ASE was 2389 vs an average ASE across 10 slices of 3500.
+
+For model 2 the single window ASE was 550885 vs an average ASE across 10 slices of 526453.
+
+Model 2 had a slightly lower rolling average ASE compared to the single value, whereas the rolling average error of model 1 was slightly higher than eh single value. 
+
+Generally - model 1 performed far better on ASE than model 2 with ASE across all slices being far lower than model 2. An inspection of what type of model according to AIC may be preferred shows that an ARMA(15, 0) would be a much better fit (lower AIC) than an ARMA(2,2)
+
+```{r AIC_CHECK}
+aic5.wge(data$x, p = 0:15)
+aic.wge(data$x, p=2, q=2)
+```
+
+### Question 9:
+
+  Given your analysis, which model do you feel is more useful in making 12-month forecasts? 
+  
+  "All models are wrong, but some are useful"
+  
+  Model 2 appears to be wrong and not very useful. Far worse at prediction (terrible ASE) and has a correlation structure (from the ACF) which doesn't map to what we can clearly see in the data (i.e a periodicity of 12). AIC also appears to prefer a model with much higher order AR terms than are present in this model. Spectral densities for the model are also rather different than the spectral densities of our realization.
+  
+  Model 1 clearly captures the seasonal behavior due to the additional (1-B12) factor. And from the ACF, we see clear spikes in autocorrelation on multiples of 12 lags. Spectral density for this model is also a good fit for the realization. Model 1 also performed better compared to model 2 across the board on test metrics. Model 1 is probably wrong, but clearly more useful than model 2 at making 12 month forecasts.
+  
+  
+### BONUS:
+
+Clearly, the rolling predictions created by model 1 (blue) are far superior to those generated by model 2 (red). The red predictions clearly miss the dips every 12 periods whereas the predictions in blue clearly capture that cyclic behavior.
+
+```{r BONUS}
+
+ggplot(data=data_frame(X=seq(1:length(model_1_rolling_predictions)), model_1_predict = model_1_rolling_predictions, model_2_predict=model_2_rolling_predictions)) + 
+  geom_line(aes(X, model_1_predict), color='blue') + 
+    geom_line(aes(X, model_2_predict), color='red') +
+      geom_line(aes(data$X[0:120], data$x[0:120]), color='black') 
+    
+```
