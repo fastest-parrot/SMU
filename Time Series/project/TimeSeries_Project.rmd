@@ -1,0 +1,19 @@
+---
+title: "Time Series Project"
+author: "Sean Kennedy"
+date: "2/29/2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+## Predicting Same Store Sales for PZZA and DPZ
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tswge)
+
+```
+
