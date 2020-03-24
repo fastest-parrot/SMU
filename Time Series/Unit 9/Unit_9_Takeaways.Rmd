@@ -81,7 +81,10 @@ pacf(data$Inflation)
 
 ```{r FOR_LIVE_SESSION}
 texas = read.csv('texasgasprice.csv')
+<<<<<<< HEAD
 
+=======
+>>>>>>> ad4c7c24664ac7873a8a69304a01ac5a9267af3b
 aic5.wge(texas$Price)
 
 ar2_est_mle = est.ar.wge(texas$Price, p=2, type = 'mle')
@@ -90,8 +93,13 @@ ar2_est_burg = est.ar.wge(texas$Price, p=2, type = 'burg')
 phi_burg = ar2_est_burg$phi
 phi_mle = ar2_est_mle$phi
 
+<<<<<<< HEAD
 predict_burg = fore.arma.wge(texas$Price, phi = phi_burg, n.ahead = 24, lastn = TRUE)
 predict_mle= fore.arma.wge(texas$Price, phi = phi_mle, n.ahead = 24, lastn = TRUE)
+=======
+predict_burg = fore.arma.wge(texas$Price, phi = phi_burg, n.ahead = 24, lastn = FALSE)
+predict_mle= fore.arma.wge(texas$Price, phi = phi_mle, n.ahead = 24, lastn = FALSE)
+>>>>>>> ad4c7c24664ac7873a8a69304a01ac5a9267af3b
 
 plotts.sample.wge(texas$Price)
 
@@ -103,13 +111,17 @@ plotts.true.wge(500, phi = phi_mle, vara=ar2_est_mle$avar)
 ```{r}
 phi_burg
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> ad4c7c24664ac7873a8a69304a01ac5a9267af3b
 ```
 
 ```{r}
 phi_mle
 
 ```
+<<<<<<< HEAD
 ```{r}
 bo2 = read.csv('Unit9_2.csv')
 pacf(bo2$x)
@@ -126,6 +138,8 @@ test = plotts.true.wge(500, ar6$phi)
 acf(test$data)
 plot(test$aut1)
 ```
+=======
+>>>>>>> ad4c7c24664ac7873a8a69304a01ac5a9267af3b
 
 ### Takewawy 1
 
@@ -160,6 +174,7 @@ plot(test$aut1)
       - ACF: depends on nature of roots
       
       
+<<<<<<< HEAD
       - PACF
       
 ```{r}
@@ -178,3 +193,6 @@ plot(test$aut1)
   acf(test$data)
   plot(test$aut1)
 ```
+=======
+      - PACF
+>>>>>>> ad4c7c24664ac7873a8a69304a01ac5a9267af3b
