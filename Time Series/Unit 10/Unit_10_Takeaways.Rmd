@@ -10,7 +10,8 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tswge)
-
+library(orcutt)
+library(tidyverse)
 ```
 
 ```{r 10.3.3}
@@ -39,38 +40,196 @@ aic5.wge(bonds$Adj.Close)
 
 ```
 
-```{r 9.5.7}
+```{r 10.7.3}
 
-phi= c(0.3, -0.7)
-mu = 37
-sigma_a = 4
-
-realization = gen.arma.wge(200, phi=phi, vara=sigma_a, sn=27)
-realization = realization + mu
-est.ar.wge(realization, p=2, type='burg')
+ar6 = est.ar.wge(bonds$Adj.Close, p=6, type='burg')
+ar8 = est.ar.wge(bonds$Adj.Close, p=8, type='burg')
 
 ```
 
-```{r 9.8.3}
-wn = read.csv('maybewhitenoise1.csv')
-plotts.sample.wge(wn$x)
+```{r 10.7.5}
+data = read.csv('zero_one_or_tworootsofone.csv')
+
+
+ar6 = est.ar.wge(data$X, p=6, type='burg')
+ar8 = est.ar.wge(data$X, p=8, type='burg')
 
 ```
 
-```{r 9.8.4}
-wn = read.csv('maybewhitenoise2.csv')
-plotts.sample.wge(wn$x)
+```{r 10.8.2}
+library(tseries)
+ x = gen.arma.wge(200,phi = c(.9), sn = 5)
+
+ 
+adf.test(x)
 
 ```
 
-```{r 9.9.4}
-#CANNOT BE ANSWERED - NO N
+
+```{r 10.8.4}
+
+p_vals = c()
+test_stats = c()
+for(i in seq(1:100)){
+
+  x = gen.arma.wge(200,phi = c(.9))
+  p_val = adf.test(x)$p.value
+  t_stat = adf.test(x)$statistic
+  p_vals = append(p_vals, p_val)
+  test_stats = append(test_stats, t_stat)
+
+}
+all_runs = data.frame(p_vals, test_stats)
+
+ftr = all_runs %>% filter(p_vals >= 0.05)
+
+length(ftr$p_vals)/length(all_runs$p_vals)
 ```
 
-```{r 9.9.5}
-inflation = read.csv('inflation.csv')
-plotts.sample.wge(inflation$Inflation)
-aic5.wge(inflation$Inflation, type='aic')
-aic5.wge(inflation$Inflation, type='bic')
+```{r 10.9.4}
+airline = read_csv('swadelay.csv')
+
+a12_est = est.ar.wge(airline$arr_delay, p = 15, type = 'burg' )
+ 
 ```
+
+```{r 10.10.3}
+d1 = artrans.wge(airline$arr_delay, phi.tr = c(1))
+d1.12 = artrans.wge(d1, c(rep(0, 11), 1))
+#plotts.sample.wge(airline$arr_delay)
+ar12 = est.ar.wge(d1.12, p= 12, type = 'burg')
+
+```
+
+
+```{r 10.12.2}
+
+#Step 2: Fit a regression line to the data using the following code:
+p_vals = c()
+for(i in seq(0:10)){
+t = seq(1,100,1)
+x = gen.sigplusnoise.wge(100, b0 = 0, b1= 0, phi= .95)
+df = data.frame(x = x, t= t)
+fit = lm(x~t, data = df)
+p_vals = append(p_vals, summary(fit)$coefficients[,4]) 
+}
+data.frame(p_vals)
+
+p_vals = c()
+for(i in seq(0:10)){
+t = seq(1,100,1)
+x = gen.sigplusnoise.wge(100, b0 = 0, b1= 0, phi= .99)
+df = data.frame(x = x, t= t)
+fit = lm(x~t, data = df)
+p_vals = append(p_vals, summary(fit)$coefficients[,4]) 
+}
+data.frame(p_vals)
+```
+
+
+
+
+
+```{r 10.12.5}
+
+x = gen.sigplusnoise.wge(100, b0 = 0, b1= 0, phi= .95)  
+#note that there is not a seed this time. We will generate a different realization each time.
+t = seq(1,100,1)
+df = data.frame(x = x, t= t)
+fit = lm(x~t, data = df)
+summary(fit) # record whether it rejected or failed to reject. 
+
+```
+
+
+
+
+```{r 10.13.3}
+x = seq(1, length(airline$arr_delay), 1)
+y = airline$arr_delay
+fit = lm(x~y, data=data.frame(x=x, y=y))
+summary(fit)
+```
+
+```{r 10.13.5}
+coc = cochrane.orcutt(fit)
+```
+
+### FOR LIVE SESSION
+
+```{r FOR_LIVE}
+
+pzza = read.csv('pzza.csv')
+p = plotts.sample.wge(pzza$price)
+p.1 = artrans.wge(pzza$price, phi.tr = c(1))
+p = plotts.sample.wge(p.1)
+
+```
+
+#### ARIMA OVERFIT
+
+```{r}
+#Papa john's stock price
+ar12 = est.ar.wge(pzza$price, p=12, type='burg')
+aic5.wge(pzza$price, p=0:12, type = 'aic')
+plotts.sample.wge(pzza$price)
+# No evidence of monthly seasonality perhaps ar1
+aic5.wge(pzza$price, p=0:12, type = 'bic')
+
+```
+
+#### SEASONAL
+
+```{r}
+ar12_real = gen.aruma.wge(n=100, s=12, sn=23)
+ar12_real_est = est.ar.wge(ar12_real, p=12, type='burg')
+ar12 = est.ar.wge(pzza$price, p=12, type='burg')
+
+# No evidence of monthly seasonality
+
+```
+
+#### COCHRANE ORCUTT
+
+```{r}
+x = seq(1, length(pzza$price), 1)
+y = pzza$price
+fit = lm(x~y, data=data.frame(x=x, y=y))
+summary(fit)
+cochrane.orcutt(fit)
+
+```
+
+
+### TAKEAWAYS
+
+### TAKEAWAY HYPOTHESIS TESTING
+
+- Null hypothesis H0 is that b = 0 (no trend), when we fail to reject the null, we are accepting that b is non-zero (evidence of a trend). When p-value is less than alpha we **reject the null** which is bad.... because the data we are generating is generated from models where b is very close to zero. Type 2 error - predicting evidence of a trend when there is none (**incorrectly rejecting the null when it's true**)
+
+### TAKEAWAY OLS IS NOT SUFFICIENT :
+
+- OLS Method for S/N is not good, fails to reject at too high of a rate. Terrible way to test - assumptions of OLS are not met by correlated time series data.
+
+
+### TAKEAWAY COCHRANE ORCUTT (S/N Test):
+
+- Searches for a linear signal (mean reversion)
+
+- fit a linear regression to get estimates of a and b paramters. 
+
+- transform by caculating the difference between the LM and the realization to estimate the correlated residuals
+
+- fit AR1 to get phi_1
+
+### TAKEAWAY SOMETHNG WRONG WITH C-O TEST :
+
+- Fails to converge....
+
+### TAKEAWAY DIFFERENCING TO TEST FOR UNIT ROOTS:
+
+- By diffing data at k lags we can test for the presence of roots Bk 
+
+- Afterwards, we can rinse repeat until we get white noise (hopefully)
+
 

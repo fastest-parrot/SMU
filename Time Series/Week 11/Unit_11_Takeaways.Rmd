@@ -1,0 +1,71 @@
+---
+title: "Unit 11 Takeaways"
+author: "Sean Kennedy"
+date: "2/29/2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tswge)
+library(orcutt)
+library(tidyverse)
+
+```
+
+```{r 11.3.2-4}
+data(airlog) # load from tswge package
+airlog1 = artrans.wge(airlog,phi.tr=1)
+airlog1.12 = artrans.wge(airlog1,phi.tr = c(rep(0,11),1))
+ww = est.ar.wge(airlog1.12,p = 12)
+
+plotts.sample.wge(ww$res)
+
+ljung.wge(ww$res, K=24)
+```
+
+### TAKEAWAYS
+
+
+
+
+
+### MODELING RESIDUALS
+
+### TESTING RESIDUALS FOR WHITE NOISE
+
+- Visual
+
+- Ljung-Box test
+
+  Null: autocorrelations are zero for all lags k
+  Alt: at least one is non-zero
+
+### TAKEAWAY OLS IS NOT SUFFICIENT :
+
+- OLS Method for S/N is not good, fails to reject at too high of a rate. Terrible way to test - assumptions of OLS are not met by correlated time series data.
+
+
+### TAKEAWAY COCHRANE ORCUTT (S/N Test):
+
+- Searches for a linear signal (mean reversion)
+
+- fit a linear regression to get estimates of a and b paramters. 
+
+- transform by caculating the difference between the LM and the realization to estimate the correlated residuals
+
+- fit AR1 to get phi_1
+
+### TAKEAWAY SOMETHNG WRONG WITH C-O TEST :
+
+- Fails to converge....
+
+### TAKEAWAY DIFFERENCING TO TEST FOR UNIT ROOTS:
+
+- By diffing data at k lags we can test for the presence of roots Bk 
+
+- Afterwards, we can rinse repeat until we get white noise (hopefully)
+
+
