@@ -1,0 +1,171 @@
+---
+title: "Unit 12 Takeaways"
+author: "Sean Kennedy"
+date: "3/24/2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tswge)
+library(orcutt)
+library(tidyverse)
+library(vars)
+```
+
+#```{r}
+#TODO: write this function
+ lag_all <-- function(tibble){
+   
+    tibble %>% dplyr::summarise_all(class) %>% tidyr::gather(variable, class)
+   
+ }
+#```
+
+```{r 12.2.5 12.5.2-5}
+
+bus = read.csv('businesssales.csv')
+
+#bus_lag = lag(bus, 1)
+X = cbind(bus$sales, bus$ad_tv, bus$ad_online, bus$discount)
+VARselect(X, lag.max=10, type='const', season=NULL, exogen=NULL)
+
+fit = VAR(X, p=2, type='const')
+
+VAR(X, p=2, type='trend')
+
+ccf(bus$ad_tv, bus$sales)
+
+AIC(fit)
+```
+
+```{r 12.3.4}
+lag_data = read.csv('whatisthelag.csv')
+
+ccf(lag_data$Y, lag_data$X1)
+
+```
+
+```{r FOR_LIVE_SK}
+
+CM = read.csv('la_cmort_study.csv')
+
+p = plotts.sample.wge(CM$cmort)
+
+#appears seasonal, yearly from spectral d
+CM_52 = artrans.wge(CM$cmort, phi.tr = c(rep(0, 51), 1))
+
+#model the residuals
+aic5.wge(CM_52, type='bic') #selects 2,0
+p_val_24 = ljung.wge(CM_52)$pval
+p_val_48 = ljung.wge(CM_52, K = 48)$pval #barely rejects
+acf(CM_52,lag.max = 48)
+c(p_val_24, p_val_48) # Fail to reject null (null is that rho_k are all uncorrelated)
+
+#seasonal model predictions
+predstemp = fore.aruma.wge(CM$temp,s = 52, n.ahead = 20)
+predspart = fore.aruma.wge(CM$part,s = 52, n.ahead = 20)
+
+
+# Model cmort based on predicted part and temp using MLR with Cor Erros (cor errors b/c time is included?)
+ksfit = lm(cmort~temp+part+Week, data = CM)
+phi = aic.wge(ksfit$residuals)
+
+fit = arima(CM$cmort,order = c(phi$p,0,0), seasonal = list(order = c(1,0,0), period = 52), xreg = cbind(CM$temp, CM$part, CM$Week))
+
+# Check for whiteness of residuals
+acf(fit$residuals) #appear white, but still FTR for the test
+ljung.wge(fit$residuals) # pval = .048
+ljung.wge(fit$residuals, K = 48) # pval = .002
+
+
+#load the forecasted Part and Temp in a data frame
+next20 = data.frame(temp = predstemp$f, part = predspart$f, Week = seq(509,528,1))
+#get predictions
+predsCMort = predict(fit,newxreg = next20)
+#plot next 20 cmort wrt time
+plot(seq(1,508,1), CM$cmort, type = "l",xlim = c(0,528), ylab = "Cardiac Mortality", main = "20 Week Cardiac Mortality Forecast")
+lines(seq(509,528,1), predsCMort$pred, type = "l", col = "red")
+
+#Find ASE  Need to forecast last 30 of known series.  
+CMsmall = CM[1:478,]
+ksfit = lm(cmort~temp+part+Week, data = CMsmall)
+phi = aic.wge(ksfit$residuals)
+attach(CMsmall)
+
+#getting an error here...
+#Error in optim(init[mask], armafn, method = optim.method, hessian = TRUE, : initial value in 'vmmin' is not finite
+fit = arima(cmort,order = c(phi$p,0,0), seasonal = list(order = c(1,0,0), period = 52), xreg = cbind(temp, part, Week))
+
+last30 = data.frame(cmort = CM$cmort[479:508], part = CM$part[479:508], Week = seq(479,508,1))
+#get predictions
+predsCMort = predict(fit,newxreg = last30)
+
+
+ASE = mean((CM$cmort[479:508] - predsCMort$pred)^2)
+ASE
+
+#X = cbind(CM$temp, CM$part, CM$cmort)
+#VARselect(X, lag.max=20, type='const', season=NULL, exogen=NULL)
+
+#fit_const = VAR(X, p=2, type='const')
+#fit_const
+#VAR(X, p=2, type='trend')
+
+#ccf(bus$ad_tv, bus$sales)
+
+#AIC(fit)
+```
+
+### TAKEAWAYS
+
+
+### MULTIVARIATE REGRESSION
+
+n = number of observations
+m = number of features (independent variables)
+
+### ARIMA FUNCTION
+
+- Will estimate the fit of the independent variables
+- Returns the constant
+- Returns the AR parameters
+
+### DOC - YOUR HAIR IN 12.2.3 LOOKS..... BAD
+
+- Clean it up :)
+
+### USE LAG VARIABLES WHEN THEIR OCCURENCE IN THE PAST INFLUENCES THE VALUES YOU ARE TRYING TO PREDICT
+
+### CROSS CORRELATION
+
+- Same as autocorrelation, but amongst different variables $X_i, X_j...X_m$
+  
+- Can be used to search for leading/lagging indicators
+
+- ccf() function lags the y variable (second position)
+
+
+### VECTOR AR(P)
+
+$X_{t1}$ refers to the observation of variable $X_1$ at time t
+
+p=2
+
+$X_{t1}  = \beta_1 + \phi_{11(1)}X_{t-1, 1} + \phi_{12(1)}X_{t-1, 2} + \phi_{11(2)}X_{t-2, 1} + \phi_{12(2)}X_{t-2, 2} + a(t)_1$
+
+
+$X_{t2}  = \beta_2 + \phi_{11(1)}X_{t-1, 1} + \phi_{12(1)}X_{t-1, 2} + \phi_{11(2)}X_{t-2, 1} + \phi_{12(2)}X_{t-2, 2} + a(t)_1$
+
+
+### FORECASTS
+
+
+### VARSelect
+
+- Used to determine the proper lag
+
+- used in tandem with VAR
+
